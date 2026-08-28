@@ -1,0 +1,33 @@
+Package: scTransit
+Type: Package
+Title: Preservation-Aware Interoperability for Single-Cell Data Objects
+Version: 0.0.1
+Authors@R: c(
+    person("Mohamed N.", "Hassan", role = c("aut", "cre"),
+           email = "m.nhassan@hotmail.com")
+    )
+Description: Converts single-cell data among Seurat, SingleCellExperiment,
+    AnnData, and Loom representations while preserving expression matrices,
+    cell and feature metadata, and dimensional reductions when supported by
+    the target format. Conversion is explicit about unsupported or missing
+    components and performs alignment checks before writing output files.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 8.1.0
+Depends:
+    R (>= 4.2.0)
+Imports:
+    Matrix,
+    methods,
+    reticulate,
+    SeuratObject
+Suggests:
+    Seurat,
+    SingleCellExperiment,
+    SummarizedExperiment,
+    S4Vectors,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+URL: https://github.com/mohamednhassan/scTransit
+BugReports: https://github.com/mohamednhassan/scTransit/issues
