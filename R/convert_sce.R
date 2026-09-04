@@ -94,7 +94,7 @@ convert_sce_to_anndata <- function(input, output) {
   if (!dir.exists(dirname(output))) {
     stop("Output directory does not exist: ", dirname(output))
   }
-  adata$write_h5ad(output)
+  adata$write_h5ad(output, convert_strings_to_categoricals = FALSE)
   message("H5AD created successfully.")
   invisible(output)
 }

@@ -120,34 +120,63 @@ convert_anndata_to_seurat <- function(input, output) {
   if (anyDuplicated(feature_names)) {
     stop("Duplicate feature names detected in AnnData var_names.")
   }
+
   raw_counts <- NULL
   counts_source <- NULL
+
   if ("counts" %in% layers) {
     mat <- adata$layers$`__getitem__`("counts")
+
     if (reticulate::py_to_r(scipy_sparse$issparse(mat))) {
       values <- reticulate::py_to_r(mat$data$astype("float64"))
     } else {
-      values <- as.numeric(reticulate::py_to_r(mat$astype("float64")))
+      values <- as.numeric(
+        reticulate::py_to_r(
+          mat$astype("float64")
+        )
+      )
     }
-    if (all(values >= 0) && all(abs(values - round(values)) < 1e-8)) {
-      raw_counts <- reticulate::py_to_r(mat$astype("float64"))
+
+    if (all(is.finite(values)) && all(values >= 0)) {
+      raw_counts <- reticulate::py_to_r(
+        mat$astype("float64")
+      )
       counts_source <- "counts_layer"
       message("Using layers['counts'] as Seurat counts.")
+    } else {
+      stop(
+        "AnnData layers['counts'] contains negative or non-finite values.",
+        call. = FALSE
+      )
     }
   }
+
   if (is.null(raw_counts)) {
     mat <- adata$X
+
     if (reticulate::py_to_r(scipy_sparse$issparse(mat))) {
       values <- reticulate::py_to_r(mat$data$astype("float64"))
     } else {
-      values <- as.numeric(reticulate::py_to_r(mat$astype("float64")))
+      values <- as.numeric(
+        reticulate::py_to_r(
+          mat$astype("float64")
+        )
+      )
     }
-    if (all(values >= 0) && all(abs(values - round(values)) < 1e-8)) {
-      raw_counts <- reticulate::py_to_r(mat$astype("float64"))
+
+    if (
+      all(is.finite(values)) &&
+      all(values >= 0) &&
+      all(abs(values - round(values)) < 1e-8)
+    ) {
+      raw_counts <- reticulate::py_to_r(
+        mat$astype("float64")
+      )
       counts_source <- "X"
       message("Using X as Seurat counts.")
     }
   }
+
   if (is.null(raw_counts)) {
     message(
       "Raw counts-like matrix not found in X or layers['counts'].\n",
@@ -157,49 +186,83 @@ convert_anndata_to_seurat <- function(input, output) {
     )
     return(invisible(NULL))
   }
+
   normalized_data <- NULL
+
   if ("logcounts" %in% layers) {
     normalized_data <- reticulate::py_to_r(
       adata$layers$`__getitem__`("logcounts")$astype("float64")
     )
     message("Using layers['logcounts'] as Seurat data.")
   } else if (!identical(counts_source, "X")) {
-    normalized_data <- reticulate::py_to_r(adata$X$astype("float64"))
+    normalized_data <- reticulate::py_to_r(
+      adata$X$astype("float64")
+    )
     message("Using X as Seurat data.")
   } else {
     message("Normalized data not found. Seurat will contain counts only.")
   }
+
   raw_counts <- Matrix::t(raw_counts)
+
   if (!inherits(raw_counts, "sparseMatrix")) {
-    raw_counts <- Matrix::Matrix(raw_counts, sparse = TRUE)
+    raw_counts <- Matrix::Matrix(
+      raw_counts,
+      sparse = TRUE
+    )
   }
+
   rownames(raw_counts) <- feature_names
   colnames(raw_counts) <- cell_names
+
   if (!is.null(normalized_data)) {
     normalized_data <- Matrix::t(normalized_data)
+
     if (!inherits(normalized_data, "sparseMatrix")) {
-      normalized_data <- Matrix::Matrix(normalized_data, sparse = TRUE)
+      normalized_data <- Matrix::Matrix(
+        normalized_data,
+        sparse = TRUE
+      )
     }
+
     rownames(normalized_data) <- feature_names
     colnames(normalized_data) <- cell_names
   }
+
   metadata <- reticulate::py_to_r(adata$obs) |>
     as.data.frame()
+
   rownames(metadata) <- cell_names
+
   feature_metadata <- reticulate::py_to_r(adata$var) |>
     as.data.frame()
+
   rownames(feature_metadata) <- feature_names
-  message("Raw counts: ", paste(dim(raw_counts), collapse = " x "))
+
+  message(
+    "Raw counts: ",
+    paste(dim(raw_counts), collapse = " x ")
+  )
+
   if (!is.null(normalized_data)) {
-    message("Data: ", paste(dim(normalized_data), collapse = " x "))
+    message(
+      "Data: ",
+      paste(dim(normalized_data), collapse = " x ")
+    )
   } else {
     message("Data: None")
   }
-  message("Metadata: ", paste(dim(metadata), collapse = " x "))
+
+  message(
+    "Metadata: ",
+    paste(dim(metadata), collapse = " x ")
+  )
+
   stopifnot(
     identical(colnames(raw_counts), rownames(metadata)),
     identical(rownames(raw_counts), rownames(feature_metadata))
   )
+
   if (!is.null(normalized_data)) {
     stopifnot(
       identical(dim(normalized_data), dim(raw_counts)),
@@ -207,24 +270,44 @@ convert_anndata_to_seurat <- function(input, output) {
       identical(colnames(normalized_data), colnames(raw_counts))
     )
   }
+
   message("Matrix alignment checks passed!")
+
   reduction_list <- list()
+
   for (red in reductions) {
-    emb <- reticulate::py_to_r(adata$obsm$`__getitem__`(red)) |>
+    emb <- reticulate::py_to_r(
+      adata$obsm$`__getitem__`(red)
+    ) |>
       as.matrix()
+
     rownames(emb) <- cell_names
+
     if (!identical(rownames(emb), colnames(raw_counts))) {
-      stop("Cell names in embedding '", red, "' do not match the Seurat cell order.")
+      stop(
+        "Cell names in embedding '",
+        red,
+        "' do not match the Seurat cell order."
+      )
     }
+
     reduction_list[[red]] <- emb
-    message(red, ": ", nrow(emb), " cells x ", ncol(emb), " dimensions")
+
+    message(
+      red, ": ",
+      nrow(emb), " cells x ",
+      ncol(emb), " dimensions"
+    )
   }
+
   message("\nCreating Seurat object...")
+
   seuratObj <- SeuratObject::CreateSeuratObject(
-    counts = raw_counts,
-    meta.data = metadata
+    counts = raw_counts
   )
+
   assay_name <- SeuratObject::DefaultAssay(seuratObj)
+
   if (!is.null(normalized_data)) {
     seuratObj <- SeuratObject::SetAssayData(
       seuratObj,
@@ -233,25 +316,68 @@ convert_anndata_to_seurat <- function(input, output) {
       new.data = normalized_data
     )
   }
+
   if (ncol(feature_metadata) > 0) {
     seuratObj[[assay_name]][[]] <- feature_metadata
   }
+
   message("Counts have been added. Now adding reductions..\n")
+
   for (red in names(reduction_list)) {
     seurat_red_name <- sub("^X_", "", red)
     emb <- reduction_list[[red]]
-    key <- paste0(toupper(gsub("[^A-Za-z0-9]", "", seurat_red_name)), "_")
-    colnames(emb) <- paste0(key, seq_len(ncol(emb)))
+    key <- paste0(
+      toupper(
+        gsub(
+          "[^A-Za-z0-9]",
+          "",
+          seurat_red_name
+        )
+      ),
+      "_"
+    )
+
+    colnames(emb) <- paste0(
+      key,
+      seq_len(ncol(emb))
+    )
+
     seuratObj[[seurat_red_name]] <- SeuratObject::CreateDimReducObject(
       embeddings = emb,
       assay = assay_name,
       key = key
     )
   }
+
+  if (!identical(rownames(metadata), colnames(seuratObj))) {
+    stop(
+      "Cell metadata is not aligned with the created Seurat object.",
+      call. = FALSE
+    )
+  }
+
+  seuratObj@meta.data <- metadata
+
   print(seuratObj)
+
   message("\nExporting Seurat as RDS file...\n")
-  saveRDS(seuratObj, file = output)
+
+  output <- path.expand(output)
+
+  if (!dir.exists(dirname(output))) {
+    stop(
+      "Output directory does not exist: ",
+      dirname(output)
+    )
+  }
+
+  saveRDS(
+    seuratObj,
+    file = output
+  )
+
   message("Object created successfully.")
+
   invisible(output)
 }
 
@@ -362,7 +488,7 @@ convert_seurat_to_anndata <- function(input, output) {
   message("AnnData object created")
   message("Writing h5ad output file...\n")
   output <- path.expand(output)
-  adata$write_h5ad(output)
+  adata$write_h5ad(output, convert_strings_to_categoricals = FALSE)
   message("H5AD created successfully.\n")
   invisible(output)
 }
@@ -539,24 +665,33 @@ convert_sce_to_seurat <- function(input, output) {
   if (!file.exists(input)) {
     stop("File does not exist. Please recheck the path.")
   }
+
   input <- normalizePath(input, mustWork = TRUE)
+
   message("Reading SingleCellExperiment object...")
+
   obj <- suppressPackageStartupMessages(
     readRDS(input)
   )
+
   if (!inherits(obj, "SingleCellExperiment")) {
     stop("Input RDS is not a SingleCellExperiment object.")
   }
+
   message("Inspecting object structure...")
+
   assays <- SummarizedExperiment::assayNames(obj)
   reductions <- SingleCellExperiment::reducedDimNames(obj)
+
   if (!"counts" %in% assays) {
     stop("counts assay not found in SingleCellExperiment.")
   }
+
   counts_mat <- SummarizedExperiment::assay(
     obj,
     "counts"
   )
+
   data_mat <- if ("logcounts" %in% assays) {
     SummarizedExperiment::assay(
       obj,
@@ -565,11 +700,13 @@ convert_sce_to_seurat <- function(input, output) {
   } else {
     NULL
   }
+
   message(
     "Counts: ",
     nrow(counts_mat), " features x ",
     ncol(counts_mat), " cells"
   )
+
   if (!is.null(data_mat)) {
     message(
       "Logcounts: ",
@@ -579,20 +716,26 @@ convert_sce_to_seurat <- function(input, output) {
   } else {
     message("Logcounts: None")
   }
+
   cell_names <- colnames(obj)
   feature_names <- rownames(obj)
+
   metadata <- as.data.frame(
     SummarizedExperiment::colData(obj)
   )
+
   feature_metadata <- as.data.frame(
     SummarizedExperiment::rowData(obj)
   )
+
   rownames(metadata) <- cell_names
   rownames(feature_metadata) <- feature_names
+
   stopifnot(
     identical(colnames(counts_mat), rownames(metadata)),
     identical(rownames(counts_mat), rownames(feature_metadata))
   )
+
   if (!is.null(data_mat)) {
     stopifnot(
       identical(dim(counts_mat), dim(data_mat)),
@@ -600,16 +743,20 @@ convert_sce_to_seurat <- function(input, output) {
       identical(colnames(counts_mat), colnames(data_mat))
     )
   }
+
   stopifnot(
     !anyDuplicated(cell_names),
     !anyDuplicated(feature_names)
   )
+
   message("Matrix alignment checks passed!")
+
   seuratObj <- SeuratObject::CreateSeuratObject(
-    counts = counts_mat,
-    meta.data = metadata
+    counts = counts_mat
   )
+
   assay_name <- SeuratObject::DefaultAssay(seuratObj)
+
   if (!is.null(data_mat)) {
     seuratObj <- SeuratObject::SetAssayData(
       seuratObj,
@@ -618,38 +765,47 @@ convert_sce_to_seurat <- function(input, output) {
       new.data = data_mat
     )
   }
+
   if (ncol(feature_metadata) > 0) {
     seuratObj[[assay_name]][[]] <- feature_metadata
   }
+
   if (length(reductions) > 0) {
     for (red in reductions) {
       emb <- SingleCellExperiment::reducedDim(
         obj,
         red
       )
+
       emb <- as.matrix(emb)
       emb <- emb[cell_names, , drop = FALSE]
+
       dim_names <- colnames(emb)
       key <- NULL
+
       if (!is.null(dim_names) && length(dim_names) > 0) {
         prefixes <- sub("[0-9]+$", "", dim_names)
+
         if (length(unique(prefixes)) == 1 &&
             nzchar(prefixes[1]) &&
             all(grepl("^[A-Za-z][A-Za-z0-9]*_$", prefixes))) {
           key <- prefixes[1]
         }
       }
+
       if (is.null(key)) {
         key <- paste0(
           toupper(red),
           "_"
         )
       }
+
       seuratObj[[red]] <- SeuratObject::CreateDimReducObject(
         embeddings = emb,
         key = key,
         assay = assay_name
       )
+
       message(
         red, ": ",
         nrow(emb), " cells x ",
@@ -657,16 +813,31 @@ convert_sce_to_seurat <- function(input, output) {
       )
     }
   }
+
+  if (!identical(rownames(metadata), colnames(seuratObj))) {
+    stop(
+      "Cell metadata is not aligned with the created Seurat object.",
+      call. = FALSE
+    )
+  }
+
+  seuratObj@meta.data <- metadata
+
   message("Seurat object created")
   message("Writing RDS output file...")
+
   output <- path.expand(output)
+
   if (!dir.exists(dirname(output))) {
     stop("Output directory does not exist: ", dirname(output))
   }
+
   saveRDS(
     seuratObj,
     file = output
   )
+
   message("RDS created successfully.")
+
   invisible(output)
 }
