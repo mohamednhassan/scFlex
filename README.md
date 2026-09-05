@@ -1,6 +1,6 @@
-# scTransit
+# scFlex
 
-**scTransit** is an R package for preservation-aware conversion among **Seurat**, **SingleCellExperiment**, **AnnData**, and **Loom**.
+**scFlex** is an R package for preservation-aware conversion among **Seurat**, **SingleCellExperiment**, **AnnData**, and **Loom**.
 
 The goal is not merely to produce a file with a new extension. scTransit checks cell/feature alignment, distinguishes raw counts from normalized expression, preserves compatible metadata and embeddings, and reports when a target format cannot represent part of the source object.
 
