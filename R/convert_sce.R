@@ -160,13 +160,18 @@ convert_anndata_to_sce <- function(input, output) {
       )
     }
     if (
-      all(values >= 0) &&
-      all(abs(values - round(values)) < 1e-8)
+      all(is.finite(values)) &&
+      all(values >= 0)
     ) {
       raw_counts <- reticulate::py_to_r(
         mat$astype("float64")
       )
       counts_source <- "layers['counts']"
+    } else {
+      stop(
+        "AnnData layers['counts'] contains negative or non-finite values.",
+        call. = FALSE
+      )
     }
   }
   if (is.null(raw_counts)) {

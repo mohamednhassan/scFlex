@@ -285,7 +285,7 @@ convert_loom_to_seurat <- function(input, output) {
     feature_names <- make.unique(feature_names)
   }
   
-  is_count_like <- function(mat) {
+  is_count_like <- function(mat, require_integer = TRUE) {
     if (reticulate::py_to_r(scipy_sparse$issparse(mat))) {
       values <- reticulate::py_to_r(
         mat$data$astype("float64")
@@ -302,11 +302,17 @@ convert_loom_to_seurat <- function(input, output) {
       return(TRUE)
     }
     
-    all(
+    valid <- all(
       is.finite(values) &
-        values >= 0 &
-        abs(values - round(values)) < 1e-8
+        values >= 0
     )
+    
+    if (require_integer) {
+      valid <- valid &&
+        all(abs(values - round(values)) < 1e-8)
+    }
+    
+    valid
   }
   
   counts_source <- NULL
@@ -315,10 +321,30 @@ convert_loom_to_seurat <- function(input, output) {
   if ("counts" %in% layers) {
     candidate <- adata$layers$`__getitem__`("counts")
     
-    if (is_count_like(candidate)) {
+    if (reticulate::py_to_r(scipy_sparse$issparse(candidate))) {
+      values <- reticulate::py_to_r(
+        candidate$data$astype("float64")
+      )
+    } else {
+      values <- as.numeric(
+        reticulate::py_to_r(
+          candidate$astype("float64")
+        )
+      )
+    }
+    
+    if (
+      all(is.finite(values)) &&
+      all(values >= 0)
+    ) {
       counts_py <- candidate
       counts_source <- "counts"
       message("Using layers['counts'] as Seurat counts.")
+    } else {
+      stop(
+        "Loom layers['counts'] contains negative or non-finite values.",
+        call. = FALSE
+      )
     }
   }
   
@@ -402,7 +428,10 @@ convert_loom_to_seurat <- function(input, output) {
     stop("Feature metadata dimensions do not match the expression matrix.")
   }
   
-  feature_metadata$original_feature_name <- feature_names_original
+  if (anyDuplicated(feature_names_original)) {
+    feature_metadata$original_feature_name <- feature_names_original
+  }
+  
   rownames(feature_metadata) <- feature_names
   
   stopifnot(
@@ -421,7 +450,6 @@ convert_loom_to_seurat <- function(input, output) {
   
   seuratObj <- SeuratObject::CreateSeuratObject(
     counts = counts_mat,
-    meta.data = metadata,
     assay = "RNA"
   )
   
@@ -474,6 +502,15 @@ convert_loom_to_seurat <- function(input, output) {
     }
   }
   
+  if (!identical(rownames(metadata), colnames(seuratObj))) {
+    stop(
+      "Cell metadata is not aligned with the created Seurat object.",
+      call. = FALSE
+    )
+  }
+  
+  seuratObj@meta.data <- metadata
+  
   message("Seurat object created")
   message("Writing RDS output file...")
   
@@ -488,7 +525,6 @@ convert_loom_to_seurat <- function(input, output) {
   message("RDS created successfully.")
   invisible(output)
 }
-
 #' Convert Seurat to Loom
 #'
 #' Reads a Seurat RDS object and writes a Loom file using loompy, preserving supported expression matrices, attributes, and reductions where representable.
@@ -1199,7 +1235,7 @@ convert_loom_to_sce <- function(input, output) {
     feature_names <- make.unique(feature_names)
   }
   
-  is_count_like <- function(mat) {
+  is_count_like <- function(mat, require_integer = TRUE) {
     if (reticulate::py_to_r(scipy_sparse$issparse(mat))) {
       values <- reticulate::py_to_r(
         mat$data$astype("float64")
@@ -1216,11 +1252,17 @@ convert_loom_to_sce <- function(input, output) {
       return(TRUE)
     }
     
-    all(
+    valid <- all(
       is.finite(values) &
-        values >= 0 &
-        abs(values - round(values)) < 1e-8
+        values >= 0
     )
+    
+    if (require_integer) {
+      valid <- valid &&
+        all(abs(values - round(values)) < 1e-8)
+    }
+    
+    valid
   }
   
   counts_source <- NULL
@@ -1229,10 +1271,15 @@ convert_loom_to_sce <- function(input, output) {
   if ("counts" %in% layers) {
     candidate <- adata$layers$`__getitem__`("counts")
     
-    if (is_count_like(candidate)) {
+    if (is_count_like(candidate, require_integer = FALSE)) {
       counts_py <- candidate
       counts_source <- "counts"
       message("Using layers['counts'] as SCE counts.")
+    } else {
+      stop(
+        "Loom layers['counts'] contains negative or non-finite values.",
+        call. = FALSE
+      )
     }
   }
   
@@ -1320,7 +1367,9 @@ convert_loom_to_sce <- function(input, output) {
     stop("Feature metadata dimensions do not match the expression matrix.")
   }
   
-  feature_metadata$original_feature_name <- feature_names_original
+  if (anyDuplicated(feature_names_original)) {
+    feature_metadata$original_feature_name <- feature_names_original
+  }
   rownames(feature_metadata) <- feature_names
   
   stopifnot(

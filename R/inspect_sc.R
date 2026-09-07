@@ -335,8 +335,8 @@ inspect_loom <- function(obj) {
   root_names <- names(loom)
   if ("matrix" %in% root_names) {
     matrix_dims <- loom[["matrix"]]$dims
-    info_list$num_features <- matrix_dims[1]
-    info_list$num_cells <- matrix_dims[2]
+    info_list$num_cells <- matrix_dims[1]
+    info_list$num_features <- matrix_dims[2]
   } else {
     info_list$num_features <- NA_integer_
     info_list$num_cells <- NA_integer_
