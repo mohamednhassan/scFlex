@@ -71,7 +71,7 @@ testthat::test_that("SCE -> AnnData preserves core data components", {
   output_file <- tempfile(fileext = ".h5ad")
   saveRDS(sce, input_file)
 
-  result <- scTransit::convert_sce_to_anndata(
+  result <- scFlex::convert_sce_to_anndata(
     input = input_file,
     output = output_file
   )
@@ -229,7 +229,7 @@ testthat::test_that("AnnData -> SCE prefers layers['counts'] and preserves core 
   output_file <- tempfile(fileext = ".rds")
   adata$write_h5ad(input_file)
 
-  result <- scTransit::convert_anndata_to_sce(
+  result <- scFlex::convert_anndata_to_sce(
     input = input_file,
     output = output_file
   )
@@ -359,11 +359,11 @@ testthat::test_that("SCE -> AnnData -> SCE round trip preserves supported conten
 
   saveRDS(original, sce_file)
 
-  scTransit::convert_sce_to_anndata(
+  scFlex::convert_sce_to_anndata(
     input = sce_file,
     output = h5ad_file
   )
-  scTransit::convert_anndata_to_sce(
+  scFlex::convert_anndata_to_sce(
     input = h5ad_file,
     output = roundtrip_file
   )
@@ -459,7 +459,7 @@ testthat::test_that("AnnData -> SCE uses integer-like X as counts when counts la
   output_file <- tempfile(fileext = ".rds")
   adata$write_h5ad(input_file)
 
-  result <- scTransit::convert_anndata_to_sce(
+  result <- scFlex::convert_anndata_to_sce(
     input = input_file,
     output = output_file
   )
@@ -512,7 +512,7 @@ testthat::test_that("AnnData -> SCE rejects non-count-like X when counts layer i
 
   result <- NULL
   testthat::expect_error(
-    result <- scTransit::convert_anndata_to_sce(
+    result <- scFlex::convert_anndata_to_sce(
       input = input_file,
       output = output_file
     ),
@@ -569,7 +569,7 @@ testthat::test_that("AnnData -> SCE prefers explicit counts layer over count-lik
   output_file <- tempfile(fileext = ".rds")
   adata$write_h5ad(input_file)
 
-  scTransit::convert_anndata_to_sce(
+  scFlex::convert_anndata_to_sce(
     input = input_file,
     output = output_file
   )

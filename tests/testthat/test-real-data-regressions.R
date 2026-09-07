@@ -37,12 +37,12 @@ testthat::test_that("AnnData explicit counts layer accepts fractional non-negati
 
   adata$write_h5ad(input_file)
 
-  scTransit::convert_anndata_to_seurat(
+  scFlex::convert_anndata_to_seurat(
     input = input_file,
     output = seurat_file
   )
 
-  scTransit::convert_anndata_to_sce(
+  scFlex::convert_anndata_to_sce(
     input = input_file,
     output = sce_file
   )
@@ -112,20 +112,20 @@ testthat::test_that("Loom explicit counts layer accepts fractional non-negative 
 
   adata$write_h5ad(h5ad_file)
 
-  scTransit::convert_anndata_to_loom(
+  scFlex::convert_anndata_to_loom(
     input = h5ad_file,
     output = loom_file
   )
 
   suppressWarnings(
-    scTransit::convert_loom_to_seurat(
+    scFlex::convert_loom_to_seurat(
       input = loom_file,
       output = seurat_file
     )
   )
 
   suppressWarnings(
-    scTransit::convert_loom_to_sce(
+    scFlex::convert_loom_to_sce(
       input = loom_file,
       output = sce_file
     )
@@ -184,13 +184,13 @@ testthat::test_that("inspect_sc reports Loom cells and features in correct orien
 
   adata$write_h5ad(h5ad_file)
 
-  scTransit::convert_anndata_to_loom(
+  scFlex::convert_anndata_to_loom(
     input = h5ad_file,
     output = loom_file
   )
 
   info <- suppressMessages(
-    scTransit::inspect_sc(loom_file)
+    scFlex::inspect_sc(loom_file)
   )
 
   testthat::expect_identical(
@@ -239,13 +239,13 @@ testthat::test_that("Loom round trip does not add original_feature_name when fea
 
   adata$write_h5ad(h5ad_file)
 
-  scTransit::convert_anndata_to_loom(
+  scFlex::convert_anndata_to_loom(
     input = h5ad_file,
     output = loom_file
   )
 
   suppressWarnings(
-    scTransit::convert_loom_to_seurat(
+    scFlex::convert_loom_to_seurat(
       input = loom_file,
       output = seurat_file
     )
@@ -295,14 +295,14 @@ testthat::test_that("Loom preserves original feature names when duplicates requi
   adata$write_h5ad(h5ad_file)
 
   suppressWarnings(
-    scTransit::convert_anndata_to_loom(
+    scFlex::convert_anndata_to_loom(
       input = h5ad_file,
       output = loom_file
     )
   )
 
   suppressWarnings(
-    scTransit::convert_loom_to_seurat(
+    scFlex::convert_loom_to_seurat(
       input = loom_file,
       output = seurat_file
     )

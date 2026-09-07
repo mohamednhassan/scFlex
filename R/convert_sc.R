@@ -1,6 +1,6 @@
 #' Convert between supported single-cell formats
 #'
-#' Dispatches a file conversion between Seurat, SingleCellExperiment, AnnData, and Loom using the corresponding scTransit conversion function.
+#' Dispatches a file conversion between Seurat, SingleCellExperiment, AnnData, and Loom using the corresponding scFlex conversion function.
 #'
 #' @details
 #' Source and destination must differ. Unsupported format names or unimplemented conversion paths produce an error.

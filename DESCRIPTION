@@ -1,4 +1,4 @@
-Package: scTransit
+Package: scFlex
 Type: Package
 Title: Preservation-Aware Interoperability for Single-Cell Data Objects
 Version: 0.0.1
@@ -29,6 +29,6 @@ Suggests:
     S4Vectors,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-URL: https://github.com/mohamednhassan/scTransit
-BugReports: https://github.com/mohamednhassan/scTransit/issues
+URL: https://github.com/mohamednhassan/scFlex
+BugReports: https://github.com/mohamednhassan/scFlex/issues
 Config/roxygen2/version: 8.1.0

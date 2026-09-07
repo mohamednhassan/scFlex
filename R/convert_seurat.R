@@ -650,7 +650,7 @@ convert_seurat_to_sce <- function(input, output) {
         layer = "counts"
       )
     } else if (any(grepl("^counts\\.", layers))) {
-      tmp_name <- ".scTransit_counts"
+      tmp_name <- ".scFlex_counts"
       assay_tmp <- SeuratObject::JoinLayers(
         assay_obj,
         layers = "counts",
@@ -667,7 +667,7 @@ convert_seurat_to_sce <- function(input, output) {
         layer = "data"
       )
     } else if (any(grepl("^data\\.", layers))) {
-      tmp_name <- ".scTransit_data"
+      tmp_name <- ".scFlex_data"
       assay_tmp <- SeuratObject::JoinLayers(
         assay_obj,
         layers = "data",

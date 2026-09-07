@@ -1,6 +1,6 @@
 test_that("internal formatting helper handles empty and populated input", {
-  expect_identical(scTransit:::collapse_or_none(character(0)), "None")
-  expect_identical(scTransit:::collapse_or_none(c("a", "b")), "a, b")
+  expect_identical(scFlex:::collapse_or_none(character(0)), "None")
+  expect_identical(scFlex:::collapse_or_none(c("a", "b")), "a, b")
 })
 
 test_that("inspect_sc rejects unsupported file extensions", {

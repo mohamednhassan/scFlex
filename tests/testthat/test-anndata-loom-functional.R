@@ -77,7 +77,7 @@ testthat::test_that("AnnData -> Loom preserves core matrix and annotations", {
   output_file <- tempfile(fileext = ".loom")
   adata$write_h5ad(input_file)
 
-  result <- scTransit::convert_anndata_to_loom(
+  result <- scFlex::convert_anndata_to_loom(
     input = input_file,
     output = output_file
   )
@@ -200,7 +200,7 @@ testthat::test_that("Loom -> AnnData preserves primary matrix and axis names", {
     col_attrs = col_attrs
   )
 
-  result <- scTransit::convert_loom_to_anndata(
+  result <- scFlex::convert_loom_to_anndata(
     input = input_file,
     output = output_file
   )
@@ -294,12 +294,12 @@ testthat::test_that("AnnData -> Loom -> AnnData round trip preserves supported c
 
   adata$write_h5ad(input_file)
 
-  scTransit::convert_anndata_to_loom(
+  scFlex::convert_anndata_to_loom(
     input = input_file,
     output = loom_file
   )
 
-  scTransit::convert_loom_to_anndata(
+  scFlex::convert_loom_to_anndata(
     input = loom_file,
     output = output_file
   )
@@ -373,7 +373,7 @@ testthat::test_that("AnnData -> Loom rejects duplicate cell names", {
   adata$write_h5ad(input_file)
 
   testthat::expect_error(
-    scTransit::convert_anndata_to_loom(
+    scFlex::convert_anndata_to_loom(
       input = input_file,
       output = output_file
     ),
@@ -416,7 +416,7 @@ testthat::test_that("duplicate feature names are made unique at Loom boundary", 
   output_file <- tempfile(fileext = ".loom")
   adata$write_h5ad(input_file)
 
-  scTransit::convert_anndata_to_loom(
+  scFlex::convert_anndata_to_loom(
     input = input_file,
     output = output_file
   )

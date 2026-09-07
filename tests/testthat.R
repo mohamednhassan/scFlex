@@ -1,4 +1,4 @@
 library(testthat)
-library(scTransit)
+library(scFlex)
 
-test_check("scTransit")
+test_check("scFlex")

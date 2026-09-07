@@ -62,7 +62,7 @@ testthat::test_that("SCE -> Loom preserves core matrix, names, metadata, and red
   output_file <- tempfile(fileext = ".loom")
   saveRDS(sce, input_file)
 
-  result <- scTransit::convert_sce_to_loom(
+  result <- scFlex::convert_sce_to_loom(
     input = input_file,
     output = output_file
   )
@@ -197,7 +197,7 @@ testthat::test_that("Loom -> SCE preserves primary matrix, names, and metadata",
     col_attrs = col_attrs
   )
 
-  result <- scTransit::convert_loom_to_sce(
+  result <- scFlex::convert_loom_to_sce(
     input = input_file,
     output = output_file
   )
@@ -283,11 +283,11 @@ testthat::test_that("SCE -> Loom -> SCE round trip preserves supported core cont
 
   saveRDS(sce, input_file)
 
-  scTransit::convert_sce_to_loom(
+  scFlex::convert_sce_to_loom(
     input = input_file,
     output = loom_file
   )
-  scTransit::convert_loom_to_sce(
+  scFlex::convert_loom_to_sce(
     input = loom_file,
     output = output_file
   )
@@ -343,7 +343,7 @@ testthat::test_that("counts-only SCE converts to Loom without inventing normaliz
   output_file <- tempfile(fileext = ".loom")
   saveRDS(sce, input_file)
 
-  scTransit::convert_sce_to_loom(
+  scFlex::convert_sce_to_loom(
     input = input_file,
     output = output_file
   )
@@ -398,7 +398,7 @@ testthat::test_that("SCE duplicate feature names are made unique at Loom boundar
   output_file <- tempfile(fileext = ".loom")
   saveRDS(sce, input_file)
 
-  scTransit::convert_sce_to_loom(
+  scFlex::convert_sce_to_loom(
     input = input_file,
     output = output_file
   )

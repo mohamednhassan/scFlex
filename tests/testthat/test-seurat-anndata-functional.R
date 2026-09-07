@@ -81,7 +81,7 @@ testthat::test_that("Seurat -> AnnData preserves core data components", {
   output_file <- tempfile(fileext = ".h5ad")
   saveRDS(seu, input_file)
 
-  result <- scTransit::convert_seurat_to_anndata(
+  result <- scFlex::convert_seurat_to_anndata(
     input = input_file,
     output = output_file
   )
@@ -228,7 +228,7 @@ testthat::test_that("AnnData -> Seurat preserves core data components", {
   output_file <- tempfile(fileext = ".rds")
   adata$write_h5ad(input_file)
 
-  result <- scTransit::convert_anndata_to_seurat(
+  result <- scFlex::convert_anndata_to_seurat(
     input = input_file,
     output = output_file
   )
@@ -380,12 +380,12 @@ testthat::test_that("Seurat -> AnnData -> Seurat round trip preserves supported 
 
   saveRDS(original, seurat_file)
 
-  scTransit::convert_seurat_to_anndata(
+  scFlex::convert_seurat_to_anndata(
     input = seurat_file,
     output = h5ad_file
   )
 
-  scTransit::convert_anndata_to_seurat(
+  scFlex::convert_anndata_to_seurat(
     input = h5ad_file,
     output = roundtrip_file
   )
@@ -492,7 +492,7 @@ testthat::test_that("counts-only Seurat -> AnnData keeps counts without inventin
   output_file <- tempfile(fileext = ".h5ad")
   saveRDS(seu, input_file)
 
-  scTransit::convert_seurat_to_anndata(
+  scFlex::convert_seurat_to_anndata(
     input = input_file,
     output = output_file
   )
@@ -558,7 +558,7 @@ testthat::test_that("AnnData -> Seurat uses integer-like X as counts when counts
   output_file <- tempfile(fileext = ".rds")
   adata$write_h5ad(input_file)
 
-  result <- scTransit::convert_anndata_to_seurat(
+  result <- scFlex::convert_anndata_to_seurat(
     input = input_file,
     output = output_file
   )
@@ -615,7 +615,7 @@ testthat::test_that("AnnData -> Seurat rejects non-count-like X when counts laye
   result <- NULL
 
   testthat::expect_error(
-    result <- scTransit::convert_anndata_to_seurat(
+    result <- scFlex::convert_anndata_to_seurat(
       input = input_file,
       output = output_file
     ),
@@ -672,7 +672,7 @@ testthat::test_that("AnnData -> Seurat prefers explicit counts layer over count-
   output_file <- tempfile(fileext = ".rds")
   adata$write_h5ad(input_file)
 
-  scTransit::convert_anndata_to_seurat(
+  scFlex::convert_anndata_to_seurat(
     input = input_file,
     output = output_file
   )
@@ -752,7 +752,7 @@ testthat::test_that("split Seurat v5 layers are joined during Seurat -> AnnData"
   output_file <- tempfile(fileext = ".h5ad")
   saveRDS(seu, input_file)
 
-  scTransit::convert_seurat_to_anndata(
+  scFlex::convert_seurat_to_anndata(
     input = input_file,
     output = output_file
   )

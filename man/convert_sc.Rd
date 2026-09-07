@@ -19,7 +19,7 @@ convert_sc(input, source, destination, output)
 The result returned by the selected conversion function, invisibly. Current converters normally return the output path invisibly; some conversions may return \code{NULL} invisibly when required count data cannot be identified.
 }
 \description{
-Dispatches a file conversion between Seurat, SingleCellExperiment, AnnData, and Loom using the corresponding scTransit conversion function.
+Dispatches a file conversion between Seurat, SingleCellExperiment, AnnData, and Loom using the corresponding scFlex conversion function.
 }
 \details{
 Source and destination must differ. Unsupported format names or unimplemented conversion paths produce an error.

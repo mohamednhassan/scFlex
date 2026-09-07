@@ -74,7 +74,7 @@ testthat::test_that("Seurat -> Loom preserves core matrix, names, metadata, and 
   output_file <- tempfile(fileext = ".loom")
   saveRDS(seu, input_file)
 
-  result <- scTransit::convert_seurat_to_loom(
+  result <- scFlex::convert_seurat_to_loom(
     input = input_file,
     output = output_file
   )
@@ -211,7 +211,7 @@ testthat::test_that("Loom -> Seurat preserves counts-like primary matrix, names,
     col_attrs = col_attrs
   )
 
-  result <- scTransit::convert_loom_to_seurat(
+  result <- scFlex::convert_loom_to_seurat(
     input = input_file,
     output = output_file
   )
@@ -295,11 +295,11 @@ testthat::test_that("Seurat -> Loom -> Seurat round trip preserves supported cor
 
   saveRDS(seu, input_file)
 
-  scTransit::convert_seurat_to_loom(
+  scFlex::convert_seurat_to_loom(
     input = input_file,
     output = loom_file
   )
-  scTransit::convert_loom_to_seurat(
+  scFlex::convert_loom_to_seurat(
     input = loom_file,
     output = output_file
   )
@@ -381,7 +381,7 @@ testthat::test_that("Seurat v5 split layers are supported during Seurat -> Loom"
   output_file <- tempfile(fileext = ".loom")
   saveRDS(seu, input_file)
 
-  scTransit::convert_seurat_to_loom(
+  scFlex::convert_seurat_to_loom(
     input = input_file,
     output = output_file
   )

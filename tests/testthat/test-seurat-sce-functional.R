@@ -80,7 +80,7 @@ testthat::test_that("Seurat -> SCE preserves core data components", {
   output_file <- tempfile(fileext = ".rds")
   saveRDS(seu, input_file)
 
-  result <- scTransit::convert_seurat_to_sce(
+  result <- scFlex::convert_seurat_to_sce(
     input = input_file,
     output = output_file
   )
@@ -208,7 +208,7 @@ testthat::test_that("SCE -> Seurat preserves core data components", {
   output_file <- tempfile(fileext = ".rds")
   saveRDS(sce, input_file)
 
-  result <- scTransit::convert_sce_to_seurat(
+  result <- scFlex::convert_sce_to_seurat(
     input = input_file,
     output = output_file
   )
@@ -345,11 +345,11 @@ testthat::test_that("Seurat -> SCE -> Seurat round trip preserves supported cont
 
   saveRDS(original, seurat_file)
 
-  scTransit::convert_seurat_to_sce(
+  scFlex::convert_seurat_to_sce(
     input = seurat_file,
     output = sce_file
   )
-  scTransit::convert_sce_to_seurat(
+  scFlex::convert_sce_to_seurat(
     input = sce_file,
     output = roundtrip_file
   )
@@ -432,7 +432,7 @@ testthat::test_that("counts-only SCE -> Seurat does not invent normalized data",
   output_file <- tempfile(fileext = ".rds")
   saveRDS(sce, input_file)
 
-  scTransit::convert_sce_to_seurat(
+  scFlex::convert_sce_to_seurat(
     input = input_file,
     output = output_file
   )
@@ -503,7 +503,7 @@ testthat::test_that("split Seurat v5 count layers are joined during Seurat -> SC
   output_file <- tempfile(fileext = ".rds")
   saveRDS(seu, input_file)
 
-  scTransit::convert_seurat_to_sce(
+  scFlex::convert_seurat_to_sce(
     input = input_file,
     output = output_file
   )
