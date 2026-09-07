@@ -4,6 +4,12 @@
 
 The goal is not merely to produce a file with a new extension. scFlex checks cell/feature alignment, distinguishes raw counts from normalized expression, preserves compatible metadata and embeddings, and reports when a target format cannot represent part of the source object.
 
+## Overview
+
+<p align="center">
+  <img src="figures/scFlex_overview.png" width="900">
+</p>
+
 ## Supported conversions
 
 | From | To | Status |
