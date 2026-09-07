@@ -86,23 +86,6 @@ Typical mappings include:
 | Feature metadata | assay metadata | `var` | `rowData` |
 | Embeddings | reductions | `obsm` | `reducedDims` |
 
-## Strict mode
-
-By default, scFlex avoids silently changing biological meaning. For example, AnnData creation expects normalized expression for `X`, and Seurat creation expects raw counts.
-
-If an input contains only one expression matrix, users can opt into a fallback:
-
-```r
-convert_sc(
-  "counts_only_sce.rds",
-  "object.h5ad",
-  from = "sce",
-  to = "anndata",
-  strict = FALSE
-)
-```
-
-The fallback is reported in the conversion notes.
 
 ## Seurat assay-structure helpers
 
