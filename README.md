@@ -2,7 +2,7 @@
 
 **scFlex** is an R package for preservation-aware conversion among **Seurat**, **SingleCellExperiment**, **AnnData**, and **Loom**.
 
-The goal is not merely to produce a file with a new extension. scTransit checks cell/feature alignment, distinguishes raw counts from normalized expression, preserves compatible metadata and embeddings, and reports when a target format cannot represent part of the source object.
+The goal is not merely to produce a file with a new extension. scFlex checks cell/feature alignment, distinguishes raw counts from normalized expression, preserves compatible metadata and embeddings, and reports when a target format cannot represent part of the source object.
 
 ## Supported conversions
 
@@ -21,25 +21,25 @@ The goal is not merely to produce a file with a new extension. scTransit checks 
 | AnnData | Loom | Supported with Loom limitations |
 | Loom | AnnData | Supported with Loom limitations |
 
-> Loom has a smaller and increasingly legacy data model. scTransit supports it as an interchange format but does not claim lossless preservation of components Loom cannot represent.
+> Loom has a smaller and increasingly legacy data model. scFlex supports it as an interchange format but does not claim lossless preservation of components Loom cannot represent.
 
 ## Installation
 
 ```r
 # install.packages("remotes")
-remotes::install_github("mohamednhassan/scTransit")
+remotes::install_github("mohamednhassan/scFlex")
 ```
 
 ## Python setup
 
-scTransit does **not** require a hard-coded Conda environment. It declares its Python requirements through `reticulate::py_require()` and lets reticulate resolve them in the user's Python configuration.
+scFlex does **not** require a hard-coded Conda environment. It declares its Python requirements through `reticulate::py_require()` and lets reticulate resolve them in the user's Python configuration.
 
-For AnnData conversion, scTransit declares `anndata>=0.10`. Loom conversion additionally declares `loompy>=3.0` only when Loom support is used.
+For AnnData conversion, scFlex declares `anndata>=0.10`. Loom conversion additionally declares `loompy>=3.0` only when Loom support is used.
 
 ## Basic usage
 
 ```r
-library(scTransit)
+library(scFlex)
 
 convert_sc(
   input = "object.rds",
@@ -82,7 +82,7 @@ Typical mappings include:
 
 ## Strict mode
 
-By default, scTransit avoids silently changing biological meaning. For example, AnnData creation expects normalized expression for `X`, and Seurat creation expects raw counts.
+By default, scFlex avoids silently changing biological meaning. For example, AnnData creation expects normalized expression for `X`, and Seurat creation expects raw counts.
 
 If an input contains only one expression matrix, users can opt into a fallback:
 
@@ -130,7 +130,7 @@ MIT.
 
 ## Seurat v5 split layers
 
-scTransit recognizes both canonical layers such as `counts`/`data` and split
+scFlex recognizes both canonical layers such as `counts`/`data` and split
 Seurat v5 layers such as `counts.sample1`, `counts.sample2`, and `data.sample1`.
 Matching split layers are joined internally on a temporary assay for conversion;
 the input object is not modified.

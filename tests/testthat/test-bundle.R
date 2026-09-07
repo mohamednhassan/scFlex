@@ -1,11 +1,14 @@
-test_that("bundle validation catches misalignment", {
-  counts <- Matrix::Matrix(matrix(1:6, nrow = 2), sparse = TRUE)
-  rownames(counts) <- c("g1", "g2")
-  colnames(counts) <- c("c1", "c2", "c3")
-
-  data <- counts
-  colnames(data) <- c("c3", "c2", "c1")
-
-  x <- scTransit:::.new_bundle(counts = counts, data = data)
-  expect_error(scTransit:::.validate_bundle(x), "not aligned")
+test_that("convert_sc validates format arguments before dispatch", {
+  expect_error(
+    convert_sc("input", "unsupported", "sce", "output"),
+    "Unsupported source format"
+  )
+  expect_error(
+    convert_sc("input", "seurat", "unsupported", "output"),
+    "Unsupported destination format"
+  )
+  expect_error(
+    convert_sc("input", "sce", "sce", "output"),
+    "Source and destination formats are the same"
+  )
 })
