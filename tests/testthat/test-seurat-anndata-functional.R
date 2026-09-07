@@ -614,13 +614,12 @@ testthat::test_that("AnnData -> Seurat rejects non-count-like X when counts laye
 
   result <- NULL
 
-  testthat::expect_message(
+  testthat::expect_error(
     result <- scTransit::convert_anndata_to_seurat(
       input = input_file,
       output = output_file
     ),
-    regexp = "count|Counts|raw",
-    all = FALSE
+    regexp = "no valid raw counts matrix was found"
   )
 
   testthat::expect_null(result)

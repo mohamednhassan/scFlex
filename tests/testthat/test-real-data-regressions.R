@@ -327,3 +327,66 @@ testthat::test_that("Loom preserves original feature names when duplicates requi
   )
 })
 
+
+
+test_that("AnnData conversions error when no valid counts source exists", {
+
+  skip_if_not_installed("reticulate")
+  skip_if_not_installed("Seurat")
+  skip_if_not_installed("SingleCellExperiment")
+
+  np <- reticulate::import("numpy", convert = FALSE)
+  anndata <- reticulate::import("anndata", convert = FALSE)
+
+  # Deliberately processed-looking matrix:
+  # contains negative and non-integer values, so X must not be
+  # interpreted as raw counts.
+  x <- matrix(
+    c(
+      -1.2, 0.5, 2.3,
+       0.1, -0.4, 1.7
+    ),
+    nrow = 2,
+    byrow = TRUE
+  )
+
+  adata <- anndata$AnnData(
+    X = np$array(x)
+  )
+
+  adata$obs_names <- c("cell1", "cell2")
+  adata$var_names <- c("gene1", "gene2", "gene3")
+
+  input <- tempfile(fileext = ".h5ad")
+  seurat_output <- tempfile(fileext = ".RDS")
+  sce_output <- tempfile(fileext = ".RDS")
+
+  adata$write_h5ad(
+    input,
+    convert_strings_to_categoricals = FALSE
+  )
+
+  expect_error(
+    convert_anndata_to_seurat(
+      input = input,
+      output = seurat_output
+    ),
+    "no valid raw counts matrix was found"
+  )
+
+  expect_false(
+    file.exists(seurat_output)
+  )
+
+  expect_error(
+    convert_anndata_to_sce(
+      input = input,
+      output = sce_output
+    ),
+    "no valid raw counts matrix was found"
+  )
+
+  expect_false(
+    file.exists(sce_output)
+  )
+})
