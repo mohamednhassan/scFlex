@@ -1,7 +1,7 @@
 Package: scFlex
 Type: Package
 Title: Preservation-Aware Interoperability for Single-Cell Data Objects
-Version: 0.0.1
+Version: 0.1.0
 Authors@R: c(
     person("Mohamed N.", "Hassan", role = c("aut", "cre"),
            email = "m.nhassan@hotmail.com")
