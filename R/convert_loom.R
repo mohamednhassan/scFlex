@@ -604,7 +604,7 @@ convert_seurat_to_loom <- function(input, output) {
       )
     } else {
       tmp_name <- paste0(
-        "sctransit_counts_",
+        "scflex_counts_",
         as.integer(Sys.time())
       )
       
@@ -628,7 +628,7 @@ convert_seurat_to_loom <- function(input, output) {
         )
       } else {
         tmp_name <- paste0(
-          "sctransit_data_",
+          "scflex_data_",
           as.integer(Sys.time())
         )
         

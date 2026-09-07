@@ -1,4 +1,4 @@
-# Contributing to scTransit
+# Contributing to scFlex
 
 Issues and pull requests are welcome. For conversion bugs, please include:
 
