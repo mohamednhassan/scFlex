@@ -2,7 +2,7 @@
 % Please edit documentation in R/inspect_sc.R
 \name{inspect_rds_object}
 \alias{inspect_rds_object}
-\title{Inspect an RDS single-cell object}
+\title{Inspect an R single-cell object}
 \usage{
 inspect_rds_object(obj)
 }
@@ -10,9 +10,11 @@ inspect_rds_object(obj)
 \item{obj}{An R object read from an RDS file.}
 }
 \value{
-An inspection information list returned invisibly by the class-specific inspector.
+Invisibly returns a list containing information about the object.
 }
 \description{
-Dispatches an already loaded R object to the Seurat or SingleCellExperiment inspector according to its class.
+Internal helper that identifies whether an object read from an RDS file is
+a Seurat or SingleCellExperiment object and dispatches it to the
+corresponding inspection function.
 }
 \keyword{internal}

@@ -2,20 +2,34 @@
 % Please edit documentation in R/inspect_sc.R
 \name{inspect_sc}
 \alias{inspect_sc}
-\title{Inspect a single-cell data file}
+\title{Inspect a single-cell object}
 \usage{
 inspect_sc(path_to_file)
 }
 \arguments{
-\item{path_to_file}{Character string giving the path to an input \code{.rds}, \code{.h5ad}, or \code{.loom} file.}
+\item{path_to_file}{Path to an RDS, H5AD, or Loom file.}
 }
 \value{
-A named list containing format-specific structural information, returned invisibly.
+Invisibly returns a list containing information about the
+inspected object. The contents of the list depend on the input format.
 }
 \description{
-Inspects a Seurat, SingleCellExperiment, AnnData, or Loom file and reports its major structural components without converting the file.
+Inspects the structure and contents of a supported single-cell data file
+without performing a conversion. Supported inputs include Seurat and
+SingleCellExperiment objects stored as RDS files, AnnData H5AD files,
+and Loom files.
 }
 \details{
-The file extension determines how the file is opened. RDS files are then classified as Seurat or SingleCellExperiment objects.
-The function prints a concise summary and returns the same information invisibly for programmatic use.
+The function reports basic information such as the number of cells and
+features, available assays or layers, dimensional reductions, metadata,
+and a sample of cell names. Additional format-specific information is
+reported when available.
+}
+\examples{
+\dontrun{
+inspect_sc("example.rds")
+inspect_sc("example.h5ad")
+inspect_sc("example.loom")
+}
+
 }

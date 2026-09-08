@@ -4,16 +4,19 @@
 \alias{convert_seu_classic_to_v5}
 \title{Convert a classic Seurat Assay to Assay5}
 \usage{
-convert_seu_classic_to_v5(input, output)
+convert_seu_classic_to_v5(input, output, assay = "RNA")
 }
 \arguments{
-\item{input}{An RDS file containing a Seurat object whose default assay is a classic Assay object.}
+\item{input}{Path to an input Seurat \code{.rds} file.}
 
-\item{output}{Path to the output RDS file.}
+\item{output}{Path to the output Seurat \code{.rds} file.}
+
+\item{assay}{Name of the assay to convert. Defaults to \code{"RNA"}.}
 }
 \value{
 The output path, returned invisibly.
 }
 \description{
-Converts the default classic Seurat Assay to Assay5, adds it to the object as \code{RNA_assay5}, makes it the default assay, and saves the updated object as RDS.
+Converts a selected classic Seurat \code{Assay} to a Seurat v5 \code{Assay5}
+while preserving the supported assay data and object structure.
 }

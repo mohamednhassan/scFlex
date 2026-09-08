@@ -7,16 +7,27 @@
 convert_anndata_to_sce(input, output)
 }
 \arguments{
-\item{input}{Path to an input \code{.h5ad} file.}
+\item{input}{Path to an AnnData H5AD file.}
 
-\item{output}{Path to the output SingleCellExperiment \code{.rds} file.}
+\item{output}{Path where the converted SingleCellExperiment RDS file
+should be written.}
 }
 \value{
-The output path, returned invisibly on success. If suitable raw count data cannot be identified, the function may return \code{NULL} invisibly without writing an output object.
+Invisibly returns the output file path.
 }
 \description{
-Reads an H5AD AnnData file and creates a SingleCellExperiment while preserving supported count data, normalized data, metadata, feature metadata, and reductions.
+Converts an AnnData H5AD file to a SingleCellExperiment object while
+preserving counts, normalized expression when available, cell metadata,
+feature metadata, and dimensional reductions.
 }
 \details{
-Raw counts are selected conservatively from an explicit \code{counts} layer when available or from \code{X} when it is non-negative and integer-like. The function does not guess raw counts from arbitrary named layers.
+An explicit \code{layers["counts"]} matrix is preferred as the counts assay.
+Fractional values are accepted in an explicit counts layer as long as all
+values are finite and non-negative. If no explicit counts layer is present,
+\code{X} is used as counts only when its values are finite, non-negative, and
+integer-like.
+
+Normalized expression is optional. If \code{layers["logcounts"]} is present it
+is stored as the SCE \code{logcounts} assay. Otherwise, \code{X} is used as
+\code{logcounts} when it was not already used as the counts matrix.
 }

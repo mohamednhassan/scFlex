@@ -7,12 +7,15 @@
 inspect_loom(obj)
 }
 \arguments{
-\item{obj}{Character string giving the path to a \code{.loom} file.}
+\item{obj}{Path to a Loom file.}
 }
 \value{
-A named list of Loom structural information, returned invisibly.
+Invisibly returns a list containing information about the
+Loom file.
 }
 \description{
-Inspects the HDF5 structure of a Loom file and reports matrix dimensions, layers, row and column attributes, graphs, and a sample of cell names when available.
+Internal helper that reads the HDF5 structure of a Loom file and reports
+its dimensions, layers, cell and feature attributes, graphs, and a sample
+of cell names when available.
 }
 \keyword{internal}

@@ -1,97 +1,153 @@
-#' Convert a Seurat Assay5 object to a classic Assay
+#' Convert a Seurat Assay5 assay to a classic Assay
 #'
-#' Converts the default Seurat Assay5 assay to a classic Seurat Assay, adds it to the object as `RNA_classic`, makes it the default assay, and saves the updated object as RDS.
+#' Converts a selected Seurat v5 `Assay5` assay to a classic Seurat `Assay`
+#' while preserving the supported assay data and object structure.
 #'
-#' @param input An RDS file containing a Seurat object whose default assay is an Assay5 object.
-#' @param output Path to the output RDS file.
+#' @param input Path to an input Seurat `.rds` file.
+#' @param output Path to the output Seurat `.rds` file.
+#' @param assay Name of the assay to convert. Defaults to `"RNA"`.
 #'
 #' @return The output path, returned invisibly.
 #' @export
-convert_seu_v5_to_classic <- function(input, output) {
-  # Checking input
-  info <- suppressMessages(inspect_sc(path_to_file = input))
-  if (info$rna_structure != "v5") {
-    stop("RNA assay is not Assay5. No conversion performed.")
-  }
-  message(
-    "\nSource RNA assay is Assay5. Starting conversion to classic Assay..."
-  )
-  # Reading object
+convert_seu_v5_to_classic <- function(input, output, assay = "RNA") {
+  ## Read object
   obj <- readRDS(input)
-  
-  # Casting an Assay5 to a classic Assay
-  source_assay <- SeuratObject::DefaultAssay(obj)
-  rna_classic <- methods::as(obj[[source_assay]], Class = "Assay")
-  SeuratObject::Key(rna_classic) <- "classicRNA_"
-  obj[["RNA_classic"]] <- rna_classic
+
+  ## Check that the requested assay exists
+  available_assays <- SeuratObject::Assays(obj)
+
+  if (!assay %in% available_assays) {
+    stop(
+      "Assay '", assay, "' was not found in the Seurat object. ",
+      "Available assays: ", collapse_or_none(available_assays),
+      ". Use inspect_sc() to inspect the available assays."
+    )
+  }
+
+  ## Access requested assay
+  source_assay <- obj[[assay]]
+
+  ## Check that the requested assay uses the Assay5 structure
+  if (!inherits(source_assay, "Assay5")) {
+    stop(
+      "Assay '", assay, "' is not an Assay5. No conversion performed."
+    )
+  }
+
+  message(
+    "\nSource assay '", assay,
+    "' is Assay5. Starting conversion to classic Assay..."
+  )
+
+  ## Cast Assay5 to classic Assay
+  classic_assay <- methods::as(source_assay, Class = "Assay")
+
+  ## Assign unique key
+  SeuratObject::Key(classic_assay) <- "classicRNA_"
+
+  ## Add converted assay to object
+  obj[["RNA_classic"]] <- classic_assay
   SeuratObject::DefaultAssay(obj) <- "RNA_classic"
-  message("\nConversion completed. RNA_classic assay has been added to the Seurat object")
-  # Saving RDS
+
+  message(
+    "\nConversion completed. RNA_classic assay has been added to the Seurat object."
+  )
+
+  ## Save RDS
   message("\nSaving object...\n")
   saveRDS(obj, output)
   message("Object has been saved!\n")
-  
+
   invisible(output)
 }
 
 #' Convert a classic Seurat Assay to Assay5
 #'
-#' Converts the default classic Seurat Assay to Assay5, adds it to the object as `RNA_assay5`, makes it the default assay, and saves the updated object as RDS.
+#' Converts a selected classic Seurat `Assay` to a Seurat v5 `Assay5`
+#' while preserving the supported assay data and object structure.
 #'
-#' @param input An RDS file containing a Seurat object whose default assay is a classic Assay object.
-#' @param output Path to the output RDS file.
+#' @param input Path to an input Seurat `.rds` file.
+#' @param output Path to the output Seurat `.rds` file.
+#' @param assay Name of the assay to convert. Defaults to `"RNA"`.
 #'
 #' @return The output path, returned invisibly.
 #' @export
-convert_seu_classic_to_v5 <- function(input, output) {
-  # Checking input
-  info <- suppressMessages(inspect_sc(path_to_file = input))
-  if (info$rna_structure != "classic") {
-    stop("RNA assay is not classic. No conversion performed.")
-  }
-  # Check installed Seurat version
+convert_seu_classic_to_v5 <- function(input, output, assay = "RNA") {
+  ## Check installed Seurat version
   seurat_version <- utils::packageVersion("Seurat")
-  if (utils::compareVersion(as.character(seurat_version), "5.0.0") < 0) {
+
+  if (seurat_version < base::package_version("5.0.0")) {
     stop(
       "Converting a classic Assay to Assay5 requires Seurat >= 5.0.0. ",
       "Current Seurat version: ",
       seurat_version
     )
   }
-  message("\nSource RNA assay is classic. Starting conversion to Assay5...")
-  
-  # Reading object
+
+  ## Read object
   obj <- readRDS(input)
-  # Casting classic Assay -> Assay5
-  source_assay <- SeuratObject::DefaultAssay(obj)
-  rna_assay5 <- methods::as(
-    obj[[source_assay]],
+
+  ## Check that the requested assay exists
+  available_assays <- SeuratObject::Assays(obj)
+
+  if (!assay %in% available_assays) {
+    stop(
+      "Assay '", assay, "' was not found in the Seurat object. ",
+      "Available assays: ", collapse_or_none(available_assays),
+      ". Use inspect_sc() to inspect the available assays."
+    )
+  }
+
+  ## Access requested assay
+  source_assay <- obj[[assay]]
+
+  ## Check that the requested assay uses the classic Assay structure
+  if (!inherits(source_assay, "Assay")) {
+    stop(
+      "Assay '", assay, "' is not a classic Assay. No conversion performed."
+    )
+  }
+
+  message(
+    "\nSource assay '", assay,
+    "' is classic. Starting conversion to Assay5..."
+  )
+
+  ## Cast classic Assay to Assay5
+  assay5 <- methods::as(
+    source_assay,
     Class = "Assay5"
   )
-  # Assign unique key
-  SeuratObject::Key(rna_assay5) <- "RNAassay5_"
-  # Add new assay
-  obj[["RNA_assay5"]] <- rna_assay5
+
+  ## Assign unique key
+  SeuratObject::Key(assay5) <- "RNAassay5_"
+
+  ## Add converted assay to object
+  obj[["RNA_assay5"]] <- assay5
   SeuratObject::DefaultAssay(obj) <- "RNA_assay5"
-  message("\nConversion completed. RNA_assay5 has been added to the Seurat object")
-  # Saving RDS
-  message("\nSaving object...")
+
+  message(
+    "\nConversion completed. RNA_assay5 has been added to the Seurat object."
+  )
+
+  ## Save RDS
+  message("\nSaving object...\n")
   saveRDS(obj, output)
   message("Object has been saved!\n")
+
   invisible(output)
 }
 
 #' Convert AnnData to Seurat
 #'
-#' Reads an H5AD AnnData file and creates a Seurat object while preserving supported expression data, metadata, feature metadata, and dimensional reductions when available.
-#'
-#' @details
-#' Raw counts are selected conservatively from an explicit `counts` layer when available or from `X` when it is non-negative and integer-like. The function does not guess raw counts from arbitrary named layers.
+#' Reads an AnnData H5AD file and writes a Seurat RDS object while preserving
+#' supported counts, normalized expression, metadata, feature metadata, and
+#' dimensional reductions.
 #'
 #' @param input Path to an input `.h5ad` file.
 #' @param output Path to the output Seurat `.rds` file.
 #'
-#' @return The output path, returned invisibly on success. If suitable raw count data cannot be identified, the function may return `NULL` invisibly without writing an output object.
+#' @return The output path, returned invisibly.
 #' @export
 convert_anndata_to_seurat <- function(input, output) {
   if (!file.exists(input)) {
@@ -105,7 +161,7 @@ convert_anndata_to_seurat <- function(input, output) {
 
   ad <- reticulate::import("anndata", convert = FALSE)
   scipy_sparse <- reticulate::import("scipy.sparse", convert = FALSE)
-
+  ## Reading anndata
   adata <- ad$read_h5ad(input)
 
   message("Inspecting AnnData structure...")
@@ -116,46 +172,71 @@ convert_anndata_to_seurat <- function(input, output) {
   message("Number of cells: ", n_cells)
   message("Number of features: ", n_features)
 
+  ## Accessing layers
   layers <- reticulate::iterate(
     adata$layers$keys(),
     as.character
   )
-
+  ## Accessing reductions
   reductions <- reticulate::iterate(
     adata$obsm$keys(),
     as.character
   )
 
-  # Get axis names
+  ## Getting cell names
   cell_names <- reticulate::iterate(
     adata$obs_names,
     as.character
   ) |>
     unlist(use.names = FALSE)
 
+  ## Getting feature names
   feature_names <- reticulate::iterate(
     adata$var_names,
     as.character
   ) |>
     unlist(use.names = FALSE)
 
-  if (anyDuplicated(cell_names)) {
-    stop("Duplicated cell names detected in AnnData.", call. = FALSE)
-  }
 
-  if (anyDuplicated(feature_names)) {
-    stop("Duplicated feature names detected in AnnData.", call. = FALSE)
-  }
-
-  # Find raw counts
+  # Check layers["counts"] and X for raw counts
   raw_counts <- NULL
-  counts_source <- NULL
 
-  # Prefer an explicit counts layer.
-  # Explicit counts may contain fractional values, for example after
-  # background correction or denoising, so integer values are not required.
   if ("counts" %in% layers) {
+
     mat <- adata$layers$`__getitem__`("counts")
+    ## check if the matrix is sparse
+    if (reticulate::py_to_r(scipy_sparse$issparse(mat))) {
+      values <- reticulate::py_to_r(
+        mat$data$astype("float64")
+      )
+    } else {
+      values <- as.numeric(
+        reticulate::py_to_r(
+          mat$astype("float64")
+        )
+      )
+    }
+    ## check if the matrix has raw counts, and integers
+    if (
+      all(is.finite(values)) &&
+      all(values >= 0)
+    ) {
+
+      raw_counts <- reticulate::py_to_r(
+        mat$astype("float64")
+      )
+
+      message("Using layers['counts'] as Seurat counts.")
+    } else {
+      stop(
+        "layers['counts'] contains negative or non-finite values."
+      )
+    }
+  }
+
+  if (is.null(raw_counts)) {
+
+    mat <- adata$X
 
     if (reticulate::py_to_r(scipy_sparse$issparse(mat))) {
       values <- reticulate::py_to_r(
@@ -171,114 +252,72 @@ convert_anndata_to_seurat <- function(input, output) {
 
     if (
       all(is.finite(values)) &&
-      all(values >= 0)
+      all(values >= 0) &&
+      all(abs(values - round(values)) < 1e-8)
     ) {
+
       raw_counts <- reticulate::py_to_r(
         mat$astype("float64")
       )
 
-      counts_source <- "layers['counts']"
-
-      message("Using layers['counts'] as Seurat counts.")
-    } else {
-      stop(
-        "AnnData layers['counts'] contains negative or non-finite values.",
-        call. = FALSE
-      )
+      message("Using X as Seurat counts.")
     }
   }
 
-  # If there is no explicit counts layer, only use X when it clearly
-  # looks like raw counts: finite, non-negative and integer-like.
+
   if (is.null(raw_counts)) {
-    mat <- adata$X
-
-    if (!is.null(mat)) {
-      if (reticulate::py_to_r(scipy_sparse$issparse(mat))) {
-        values <- reticulate::py_to_r(
-          mat$data$astype("float64")
-        )
-      } else {
-        values <- as.numeric(
-          reticulate::py_to_r(
-            mat$astype("float64")
-          )
-        )
-      }
-
-      if (
-        all(is.finite(values)) &&
-        all(values >= 0) &&
-        all(abs(values - round(values)) < 1e-8)
-      ) {
-        raw_counts <- reticulate::py_to_r(
-          mat$astype("float64")
-        )
-
-        counts_source <- "X"
-
-        message("Using X as Seurat counts.")
-      }
-    }
-  }
-
-  # Conversion to Seurat requires a valid counts matrix.
-  # Do not silently infer counts from raw.X or arbitrary layers.
-  if (is.null(raw_counts)) {
-    message(
-      "Raw counts-like matrix not found in X or layers['counts']."
-    )
 
     message(
+      "Raw counts-like matrix not found in X or layers['counts'].\n",
       "Layers present: ",
-      collapse_or_none(layers)
+      if (length(layers) > 0) {
+        paste(layers, collapse = ", ")
+      } else {
+        "None"
+      },
+      "\nConversion stopped."
     )
 
     stop(
-      "Conversion cannot continue because no valid raw counts matrix was found.",
-      call. = FALSE
+      "Conversion cannot continue because no valid raw counts matrix was found."
     )
   }
 
-  # Find normalized expression data
-  data_mat <- NULL
+
+  normalized_data <- NULL
 
   if ("logcounts" %in% layers) {
-    data_mat <- reticulate::py_to_r(
+    normalized_data <- reticulate::py_to_r(
       adata$layers$`__getitem__`("logcounts")$astype("float64")
     )
-
-    message("Using layers['logcounts'] as Seurat data.")
-  } else if (!identical(counts_source, "X") && !is.null(adata$X)) {
-    data_mat <- reticulate::py_to_r(
+  } else if ("counts" %in% layers && !is.null(adata$X)) {
+    candidate_data <- reticulate::py_to_r(
       adata$X$astype("float64")
     )
 
-    message("Using X as Seurat data.")
-  } else {
-    message(
-      "Normalized data not found. Seurat will contain counts only."
-    )
+    if (
+      !identical(dim(candidate_data), dim(raw_counts)) ||
+      Matrix::nnzero(candidate_data - raw_counts) > 0
+    ) {
+      normalized_data <- candidate_data
+    }
   }
+
 
   # AnnData = cells x features
   # Seurat  = features x cells
+  ## Transposing the raw counts matrix
   raw_counts <- Matrix::t(raw_counts)
 
-  if (!is.null(data_mat)) {
-    data_mat <- Matrix::t(data_mat)
+  if (!is.null(normalized_data)) {
+    normalized_data <- Matrix::t(normalized_data)
   }
 
-  # Cell metadata
-  metadata <- reticulate::py_to_r(
-    adata$obs
-  ) |>
+  ## Metadata
+  metadata <- reticulate::py_to_r(adata$obs) |>
     as.data.frame()
 
-  # Feature metadata
-  feature_metadata <- reticulate::py_to_r(
-    adata$var
-  ) |>
+  feature_metadata <- reticulate::py_to_r(adata$var) |>
     as.data.frame()
 
   message(
@@ -286,158 +325,103 @@ convert_anndata_to_seurat <- function(input, output) {
     paste(dim(raw_counts), collapse = " x ")
   )
 
-  if (!is.null(data_mat)) {
-    message(
-      "Data: ",
-      paste(dim(data_mat), collapse = " x ")
-    )
-  } else {
-    message("Data: None")
-  }
-
   message(
     "Metadata: ",
     paste(dim(metadata), collapse = " x ")
   )
 
-  message(
-    "Feature metadata: ",
-    paste(dim(feature_metadata), collapse = " x ")
-  )
 
-  # Restore R dimnames
+  # Restore Seurat dimnames
   rownames(raw_counts) <- feature_names
   colnames(raw_counts) <- cell_names
 
-  if (!is.null(data_mat)) {
-    rownames(data_mat) <- feature_names
-    colnames(data_mat) <- cell_names
+  if (!is.null(normalized_data)) {
+    rownames(normalized_data) <- feature_names
+    colnames(normalized_data) <- cell_names
   }
 
   rownames(metadata) <- cell_names
   rownames(feature_metadata) <- feature_names
 
+
   # Alignment checks
-  if (!identical(
-    colnames(raw_counts),
-    rownames(metadata)
-  )) {
-    stop(
-      "Cell metadata is not aligned with the expression matrix.",
-      call. = FALSE
-    )
-  }
+  stopifnot(
+    identical(colnames(raw_counts), rownames(metadata)),
+    identical(rownames(raw_counts), feature_names)
+  )
 
-  if (!identical(
-    rownames(raw_counts),
-    rownames(feature_metadata)
-  )) {
-    stop(
-      "Feature metadata is not aligned with the expression matrix.",
-      call. = FALSE
-    )
-  }
-
-  if (!is.null(data_mat)) {
-    if (
-      !identical(dim(raw_counts), dim(data_mat)) ||
-      !identical(rownames(raw_counts), rownames(data_mat)) ||
-      !identical(colnames(raw_counts), colnames(data_mat))
-    ) {
-      stop(
-        "Normalized data is not aligned with the counts matrix.",
-        call. = FALSE
-      )
-    }
-  }
+  stopifnot(
+    !anyDuplicated(cell_names),
+    !anyDuplicated(feature_names)
+  )
 
   message("Matrix alignment checks passed!")
+
 
   # Extract AnnData embeddings
   reduction_list <- list()
 
-  if (length(reductions) > 0) {
-    for (red in reductions) {
-      emb <- reticulate::py_to_r(
-        adata$obsm$`__getitem__`(red)
-      ) |>
-        as.matrix()
+  for (red in reductions) {
 
-      rownames(emb) <- cell_names
+    emb <- reticulate::py_to_r(
+      adata$obsm$`__getitem__`(red)
+    ) |>
+      as.matrix()
 
-      if (!identical(
-        rownames(emb),
-        colnames(raw_counts)
-      )) {
-        stop(
-          "Cell names in embedding '",
-          red,
-          "' do not match the Seurat cell order.",
-          call. = FALSE
-        )
-      }
+    rownames(emb) <- cell_names
 
-      reduction_list[[red]] <- emb
+    if (!identical(
+      rownames(emb),
+      colnames(raw_counts)
+    )) {
 
-      message(
-        red, ": ",
-        nrow(emb), " cells x ",
-        ncol(emb), " dimensions"
+      stop(
+        "Cell names in embedding '",
+        red,
+        "' do not match the Seurat cell order."
       )
     }
+
+    reduction_list[[red]] <- emb
+
+    message(
+      red, ": ",
+      nrow(emb), " cells x ",
+      ncol(emb), " dimensions"
+    )
   }
+
 
   # Construct Seurat object
   message("\nCreating Seurat object...")
 
   seuratObj <- SeuratObject::CreateSeuratObject(
-    counts = raw_counts
+    counts = raw_counts,
+    meta.data = metadata
   )
 
-  # Restore source cell metadata after object construction.
-  # CreateSeuratObject() calculates its own nCount/nFeature columns,
-  # but preservation requires the source metadata to win.
-  if (!identical(
-    rownames(metadata),
-    colnames(seuratObj)
-  )) {
-    stop(
-      "Cell metadata is not aligned with the created Seurat object.",
-      call. = FALSE
-    )
-  }
-
-  seuratObj@meta.data <- metadata
-
-  # Restore normalized expression
-  if (!is.null(data_mat)) {
+  if (!is.null(normalized_data)) {
     SeuratObject::LayerData(
-      seuratObj[["RNA"]],
+      seuratObj,
+      assay = "RNA",
       layer = "data"
-    ) <- data_mat
+    ) <- normalized_data
   }
 
-  # Restore feature metadata
   if (ncol(feature_metadata) > 0) {
-    if (!identical(
-      rownames(feature_metadata),
-      rownames(seuratObj)
-    )) {
-      stop(
-        "Feature metadata is not aligned with the created Seurat object.",
-        call. = FALSE
-      )
-    }
-
-    seuratObj[["RNA"]]@meta.data <- feature_metadata
+    seuratObj[["RNA"]] <- SeuratObject::AddMetaData(
+      seuratObj[["RNA"]],
+      metadata = feature_metadata
+    )
   }
 
   message(
     "Counts have been added. Now adding reductions..\n"
   )
 
-  # Restore dimensional reductions
+
   for (red in names(reduction_list)) {
+
     seurat_red_name <- sub("^X_", "", red)
 
     emb <- reduction_list[[red]]
@@ -466,147 +450,282 @@ convert_anndata_to_seurat <- function(input, output) {
       )
   }
 
+
   print(seuratObj)
 
   message(
     "\nExporting Seurat as RDS file...\n"
   )
 
-  output <- path.expand(output)
-
-  if (!dir.exists(dirname(output))) {
-    stop(
-      "Output directory does not exist: ",
-      dirname(output),
-      call. = FALSE
-    )
-  }
-
   saveRDS(
     seuratObj,
     file = output
   )
 
-  message("Object created successfully.")
+  message(
+    "Object created successfully."
+  )
 
   invisible(output)
 }
 
 #' Convert Seurat to AnnData
 #'
-#' Reads a Seurat RDS object and writes an H5AD AnnData representation while preserving supported expression matrices, metadata, feature metadata, and reductions.
+#' Reads a Seurat RDS object and writes an H5AD AnnData file while preserving
+#' supported counts, normalized expression, metadata, feature metadata, and
+#' dimensional reductions.
 #'
 #' @param input Path to an input Seurat `.rds` file.
 #' @param output Path to the output `.h5ad` file.
+#' @param assay Name of the Seurat assay to convert. Defaults to `"RNA"`.
 #'
 #' @return The output path, returned invisibly.
 #' @export
-convert_seurat_to_anndata <- function(input, output) {
-  if (!file.exists(input)) {
-    stop("File does not exist. Please recheck the path.")
-  }
-  input <- normalizePath(input, mustWork = TRUE)
+convert_seurat_to_anndata <- function(input, output, assay = "RNA") {
   message("Reading object...")
+
+  ## Reading object
   obj <- readRDS(input)
-  if (!inherits(obj, "Seurat")) {
-    stop("Input RDS is not a Seurat object.")
-  }
+
   message("Inspecting object structure...\n")
-  assay_name <- SeuratObject::DefaultAssay(obj)
-  assay_obj <- obj[[assay_name]]
-  message("Default assay: ", assay_name)
-  counts_mat <- NULL
-  data_mat <- NULL
-  if (inherits(assay_obj, "Assay")) {
-    message("Assay structure: classic Assay")
+
+  ## Check that the requested assay exists
+  available_assays <- SeuratObject::Assays(obj)
+
+  if (!assay %in% available_assays) {
+    stop(
+      "Assay '", assay, "' was not found in the Seurat object. ",
+      "Available assays: ", collapse_or_none(available_assays), "."
+    )
+  }
+
+  ## Access requested assay
+  source_assay <- obj[[assay]]
+
+  ## Extract expression matrices
+  if (inherits(source_assay, "Assay5")) {
+    message("Assay structure: Assay5\n")
+
+    assay_layers <- SeuratObject::Layers(source_assay)
+
+    counts_mat <- if ("counts" %in% assay_layers) {
+      SeuratObject::LayerData(
+        source_assay,
+        layer = "counts"
+      )
+    } else if (any(grepl("^counts\\.", assay_layers))) {
+      tmp_name <- ".scFlex_counts"
+      assay_tmp <- SeuratObject::JoinLayers(
+        source_assay,
+        layers = "counts",
+        new = tmp_name
+      )
+      SeuratObject::LayerData(
+        assay_tmp,
+        layer = tmp_name
+      )
+    } else {
+      NULL
+    }
+
+    data_mat <- if ("data" %in% assay_layers) {
+      SeuratObject::LayerData(
+        source_assay,
+        layer = "data"
+      )
+    } else if (any(grepl("^data\\.", assay_layers))) {
+      tmp_name <- ".scFlex_data"
+      assay_tmp <- SeuratObject::JoinLayers(
+        source_assay,
+        layers = "data",
+        new = tmp_name
+      )
+      SeuratObject::LayerData(
+        assay_tmp,
+        layer = tmp_name
+      )
+    } else {
+      NULL
+    }
+
+  } else if (inherits(source_assay, "Assay")) {
+    message("Assay structure: classic Assay\n")
+
     counts_mat <- SeuratObject::GetAssayData(
-      obj,
-      assay = assay_name,
+      source_assay,
       layer = "counts"
     )
+
     data_mat <- SeuratObject::GetAssayData(
-      obj,
-      assay = assay_name,
+      source_assay,
       layer = "data"
     )
-    if (length(data_mat) == 0) data_mat <- NULL
-  } else if (inherits(assay_obj, "Assay5")) {
-    message("Assay structure: Assay5")
-    layers <- SeuratObject::Layers(assay_obj)
-    if (any(grepl("^counts\\.", layers)) || any(grepl("^data\\.", layers))) {
-      assay_obj <- SeuratObject::JoinLayers(assay_obj)
-      layers <- SeuratObject::Layers(assay_obj)
+
+    ## Treat an empty data matrix as absent
+    if (nrow(data_mat) == 0 || ncol(data_mat) == 0) {
+      data_mat <- NULL
     }
-    if ("counts" %in% layers) {
-      counts_mat <- SeuratObject::LayerData(assay_obj, layer = "counts")
-    }
-    if ("data" %in% layers) {
-      data_mat <- SeuratObject::LayerData(assay_obj, layer = "data")
-    }
+
   } else {
-    stop("Unsupported Seurat assay structure.")
+    stop(
+      "Assay '", assay, "' has an unsupported assay structure."
+    )
   }
+
+  ## Counts are required for this conversion
   if (is.null(counts_mat)) {
-    stop("Counts layer not found in the selected Seurat assay.")
+    stop(
+      "No counts matrix was found in assay '", assay, "'."
+    )
   }
-  if (length(counts_mat) == 0) counts_mat <- NULL
-  if (!is.null(data_mat) && length(data_mat) == 0) data_mat <- NULL
-  if (is.null(counts_mat)) {
-    stop("Counts layer is empty in the selected Seurat assay.")
-  }
-  message("Counts: ", nrow(counts_mat), " features x ", ncol(counts_mat), " cells")
-  if (is.null(data_mat)) {
+
+  ## Print matrix dimensions
+  message("Counts: ",
+          nrow(counts_mat), " features x ",
+          ncol(counts_mat), " cells"
+  )
+
+  if (!is.null(data_mat)) {
+    message(
+      "Data: ",
+      nrow(data_mat), " features x ",
+      ncol(data_mat), " cells"
+    )
+  } else {
     message("Data: None")
-  } else {
-    message("Data: ", nrow(data_mat), " features x ", ncol(data_mat), " cells")
   }
-  X_source <- if (!is.null(data_mat)) data_mat else counts_mat
-  X <- Matrix::t(X_source)
+
+  ## Build AnnData counts matrix (transposed)
   counts <- Matrix::t(counts_mat)
-  obs <- sanitize_obs(obj@meta.data)
-  feature_metadata <- as.data.frame(assay_obj[[]])
-  var <- feature_metadata
-  rownames(var) <- rownames(counts_mat)
+
+  ## Use normalized data as X when available
+  if (!is.null(data_mat)) {
+    X <- Matrix::t(data_mat)
+    message("Using normalized data as AnnData X.")
+  } else {
+    X <- counts
+    message(
+      "Normalized data not found. Using counts as AnnData X."
+    )
+  }
+
+  ## Cell metadata
+  obs <- obj@meta.data
+  obs <- sanitize_obs(obs)
+
+  ## Feature metadata
+  var <- as.data.frame(source_assay[[]])
+
+  if (ncol(var) == 0) {
+    var <- data.frame(
+      row.names = rownames(counts_mat)
+    )
+  } else {
+    var <- var[
+      rownames(counts_mat),
+      ,
+      drop = FALSE
+    ]
+  }
+
+  message(
+    "X: ",
+    paste(dim(X), collapse = " x ")
+  )
+
+  message(
+    "Raw counts: ",
+    paste(dim(counts), collapse = " x ")
+  )
+
+  message(
+    "obs: ",
+    paste(dim(obs), collapse = " x ")
+  )
+
+  message(
+    "var: ",
+    paste(dim(var), collapse = " x "),
+    "\n"
+  )
+
+  ## Check matrix alignment
   stopifnot(
     identical(rownames(obs), rownames(X)),
     identical(rownames(var), colnames(X)),
     identical(rownames(obs), rownames(counts)),
     identical(rownames(var), colnames(counts))
   )
+
   stopifnot(
     !anyDuplicated(rownames(obs)),
     !anyDuplicated(rownames(var))
   )
-  message("Matrix dimensions alignment checks passed!")
+
+  message("Matrix dimension and alignment checks passed!")
+
+  ## Get reductions
   reductions <- SeuratObject::Reductions(obj)
+
+  ## Import AnnData
   reticulate::py_require("anndata>=0.10")
   ad <- reticulate::import("anndata")
+
+  ## Create AnnData object
   adata <- ad$AnnData(
     X = X,
     obs = obs,
     var = var
   )
+
+  ## Add reductions
   if (length(reductions) > 0) {
     for (red in reductions) {
+      embeddings <- SeuratObject::Embeddings(
+        obj[[red]]
+      )
+
+      embeddings <- unname(embeddings)
+
       key <- paste0("X_", red)
-      reduction_matrix <- SeuratObject::Embeddings(obj[[red]])
-      reduction_py <- reticulate::r_to_py(unname(reduction_matrix))
-      adata$obsm$`__setitem__`(key, reduction_py)
-      message(red, ": ", nrow(reduction_matrix), " cells x ", ncol(reduction_matrix), " dimensions")
+
+      adata$obsm$`__setitem__`(
+        key,
+        reticulate::r_to_py(embeddings)
+      )
     }
   }
-  adata$layers["counts"] <- counts
-  message("AnnData object created")
+
+  message("AnnData object created\n")
+
+  ## Add raw counts layer
+  adata$layers$`__setitem__`(
+    "counts",
+    reticulate::r_to_py(counts)
+  )
+
+  message("All matrices have been added\n")
+
+  ## Write H5AD file
   message("Writing h5ad output file...\n")
+
   output <- path.expand(output)
-  adata$write_h5ad(output, convert_strings_to_categoricals = FALSE)
+
+  adata$write_h5ad(
+    output,
+    convert_strings_to_categoricals = FALSE
+  )
+
   message("H5AD created successfully.\n")
+
   invisible(output)
 }
 
 #' Convert Seurat to SingleCellExperiment
 #'
-#' Reads a Seurat RDS object and creates a SingleCellExperiment while preserving supported assays, cell metadata, feature metadata, and reductions.
+#' Reads a Seurat RDS object and writes a SingleCellExperiment RDS object while
+#' preserving supported counts, normalized expression, metadata, feature
+#' metadata, and dimensional reductions.
 #'
 #' @param input Path to an input Seurat `.rds` file.
 #' @param output Path to the output SingleCellExperiment `.rds` file.
@@ -629,6 +748,7 @@ convert_seurat_to_sce <- function(input, output) {
   message("Default assay: ", assay_name)
   counts_mat <- NULL
   data_mat <- NULL
+  ## Checking assay structure
   if (inherits(assay_obj, "Assay")) {
     message("Assay structure: classic Assay")
     counts_mat <- SeuratObject::GetAssayData(
@@ -650,7 +770,7 @@ convert_seurat_to_sce <- function(input, output) {
         layer = "counts"
       )
     } else if (any(grepl("^counts\\.", layers))) {
-      tmp_name <- ".scFlex_counts"
+      tmp_name <- ".scTransit_counts"
       assay_tmp <- SeuratObject::JoinLayers(
         assay_obj,
         layers = "counts",
@@ -667,7 +787,7 @@ convert_seurat_to_sce <- function(input, output) {
         layer = "data"
       )
     } else if (any(grepl("^data\\.", layers))) {
-      tmp_name <- ".scFlex_data"
+      tmp_name <- ".scTransit_data"
       assay_tmp <- SeuratObject::JoinLayers(
         assay_obj,
         layers = "data",
@@ -741,15 +861,9 @@ convert_seurat_to_sce <- function(input, output) {
     for (red in reductions) {
       emb <- SeuratObject::Embeddings(obj[[red]])
       emb <- emb[colnames(counts_mat), , drop = FALSE]
-      SingleCellExperiment::reducedDim(
-        sce,
-        red
-      ) <- emb
-      message(
-        red, ": ",
-        nrow(emb), " cells x ",
-        ncol(emb), " dimensions"
-      )
+      SingleCellExperiment::reducedDim(sce, red) <- emb
+      message(red, ": ", nrow(emb), " cells x ",
+              ncol(emb), " dimensions")
     }
   }
   message("SingleCellExperiment object created")
@@ -765,7 +879,9 @@ convert_seurat_to_sce <- function(input, output) {
 
 #' Convert SingleCellExperiment to Seurat
 #'
-#' Reads a SingleCellExperiment RDS object and creates a Seurat object while preserving supported expression assays, metadata, feature metadata, and reductions.
+#' Reads a SingleCellExperiment RDS object and writes a Seurat RDS object while
+#' preserving supported counts, normalized expression, metadata, feature
+#' metadata, and dimensional reductions.
 #'
 #' @param input Path to an input SingleCellExperiment `.rds` file.
 #' @param output Path to the output Seurat `.rds` file.
@@ -776,33 +892,24 @@ convert_sce_to_seurat <- function(input, output) {
   if (!file.exists(input)) {
     stop("File does not exist. Please recheck the path.")
   }
-
   input <- normalizePath(input, mustWork = TRUE)
-
   message("Reading SingleCellExperiment object...")
-
   obj <- suppressPackageStartupMessages(
     readRDS(input)
   )
-
   if (!inherits(obj, "SingleCellExperiment")) {
     stop("Input RDS is not a SingleCellExperiment object.")
   }
-
   message("Inspecting object structure...")
-
   assays <- SummarizedExperiment::assayNames(obj)
   reductions <- SingleCellExperiment::reducedDimNames(obj)
-
   if (!"counts" %in% assays) {
     stop("counts assay not found in SingleCellExperiment.")
   }
-
   counts_mat <- SummarizedExperiment::assay(
     obj,
     "counts"
   )
-
   data_mat <- if ("logcounts" %in% assays) {
     SummarizedExperiment::assay(
       obj,
@@ -811,13 +918,11 @@ convert_sce_to_seurat <- function(input, output) {
   } else {
     NULL
   }
-
   message(
     "Counts: ",
     nrow(counts_mat), " features x ",
     ncol(counts_mat), " cells"
   )
-
   if (!is.null(data_mat)) {
     message(
       "Logcounts: ",
@@ -827,26 +932,20 @@ convert_sce_to_seurat <- function(input, output) {
   } else {
     message("Logcounts: None")
   }
-
   cell_names <- colnames(obj)
   feature_names <- rownames(obj)
-
   metadata <- as.data.frame(
     SummarizedExperiment::colData(obj)
   )
-
   feature_metadata <- as.data.frame(
     SummarizedExperiment::rowData(obj)
   )
-
   rownames(metadata) <- cell_names
   rownames(feature_metadata) <- feature_names
-
   stopifnot(
     identical(colnames(counts_mat), rownames(metadata)),
     identical(rownames(counts_mat), rownames(feature_metadata))
   )
-
   if (!is.null(data_mat)) {
     stopifnot(
       identical(dim(counts_mat), dim(data_mat)),
@@ -854,20 +953,16 @@ convert_sce_to_seurat <- function(input, output) {
       identical(colnames(counts_mat), colnames(data_mat))
     )
   }
-
   stopifnot(
     !anyDuplicated(cell_names),
     !anyDuplicated(feature_names)
   )
-
   message("Matrix alignment checks passed!")
-
   seuratObj <- SeuratObject::CreateSeuratObject(
-    counts = counts_mat
+    counts = counts_mat,
+    meta.data = metadata
   )
-
   assay_name <- SeuratObject::DefaultAssay(seuratObj)
-
   if (!is.null(data_mat)) {
     seuratObj <- SeuratObject::SetAssayData(
       seuratObj,
@@ -876,47 +971,34 @@ convert_sce_to_seurat <- function(input, output) {
       new.data = data_mat
     )
   }
-
   if (ncol(feature_metadata) > 0) {
     seuratObj[[assay_name]][[]] <- feature_metadata
   }
-
   if (length(reductions) > 0) {
     for (red in reductions) {
       emb <- SingleCellExperiment::reducedDim(
         obj,
         red
       )
-
       emb <- as.matrix(emb)
       emb <- emb[cell_names, , drop = FALSE]
-
-      dim_names <- colnames(emb)
-      key <- NULL
-
-      if (!is.null(dim_names) && length(dim_names) > 0) {
-        prefixes <- sub("[0-9]+$", "", dim_names)
-
-        if (length(unique(prefixes)) == 1 &&
-            nzchar(prefixes[1]) &&
-            all(grepl("^[A-Za-z][A-Za-z0-9]*_$", prefixes))) {
-          key <- prefixes[1]
-        }
-      }
-
-      if (is.null(key)) {
-        key <- paste0(
+      key <- if (
+        !is.null(colnames(emb)) &&
+        length(colnames(emb)) > 0 &&
+        grepl("^[A-Za-z][A-Za-z0-9]*_[0-9]+$", colnames(emb)[1])
+      ) {
+        sub("[0-9]+$", "", colnames(emb)[1])
+      } else {
+        paste0(
           toupper(red),
           "_"
         )
       }
-
       seuratObj[[red]] <- SeuratObject::CreateDimReducObject(
         embeddings = emb,
         key = key,
         assay = assay_name
       )
-
       message(
         red, ": ",
         nrow(emb), " cells x ",
@@ -924,31 +1006,16 @@ convert_sce_to_seurat <- function(input, output) {
       )
     }
   }
-
-  if (!identical(rownames(metadata), colnames(seuratObj))) {
-    stop(
-      "Cell metadata is not aligned with the created Seurat object.",
-      call. = FALSE
-    )
-  }
-
-  seuratObj@meta.data <- metadata
-
   message("Seurat object created")
   message("Writing RDS output file...")
-
   output <- path.expand(output)
-
   if (!dir.exists(dirname(output))) {
     stop("Output directory does not exist: ", dirname(output))
   }
-
   saveRDS(
     seuratObj,
     file = output
   )
-
   message("RDS created successfully.")
-
   invisible(output)
 }

@@ -4,16 +4,20 @@
 \alias{convert_seurat_to_anndata}
 \title{Convert Seurat to AnnData}
 \usage{
-convert_seurat_to_anndata(input, output)
+convert_seurat_to_anndata(input, output, assay = "RNA")
 }
 \arguments{
 \item{input}{Path to an input Seurat \code{.rds} file.}
 
 \item{output}{Path to the output \code{.h5ad} file.}
+
+\item{assay}{Name of the Seurat assay to convert. Defaults to \code{"RNA"}.}
 }
 \value{
 The output path, returned invisibly.
 }
 \description{
-Reads a Seurat RDS object and writes an H5AD AnnData representation while preserving supported expression matrices, metadata, feature metadata, and reductions.
+Reads a Seurat RDS object and writes an H5AD AnnData file while preserving
+supported counts, normalized expression, metadata, feature metadata, and
+dimensional reductions.
 }

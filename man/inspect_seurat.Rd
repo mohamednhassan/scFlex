@@ -10,9 +10,12 @@ inspect_seurat(obj)
 \item{obj}{A Seurat object.}
 }
 \value{
-A named list of structural information, returned invisibly.
+Invisibly returns a list containing information about the
+Seurat object.
 }
 \description{
-Reports dimensions, assays, the default assay structure, reductions, graphs, neighbors, metadata columns, and a sample of cell names from a Seurat object.
+Internal helper that reports the structure of a Seurat object, including
+its dimensions, assays, default assay structure, reductions, graphs,
+neighbors, metadata columns, and a sample of cell names.
 }
 \keyword{internal}

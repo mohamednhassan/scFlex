@@ -18,7 +18,9 @@ convert_sce_to_anndata <- function(input, output) {
     stop("Input RDS is not a SingleCellExperiment object.")
   }
   message("Inspecting object structure...")
+  ## Access assays available
   assays <- SummarizedExperiment::assayNames(obj)
+  ## Access reductions
   reductions <- SingleCellExperiment::reducedDimNames(obj)
   if (!"counts" %in% assays) {
     stop("counts assay not found in SingleCellExperiment.")
@@ -101,39 +103,67 @@ convert_sce_to_anndata <- function(input, output) {
 
 #' Convert AnnData to SingleCellExperiment
 #'
-#' Reads an H5AD AnnData file and creates a SingleCellExperiment while preserving supported count data, normalized data, metadata, feature metadata, and reductions.
+#' Converts an AnnData H5AD file to a SingleCellExperiment object while
+#' preserving counts, normalized expression when available, cell metadata,
+#' feature metadata, and dimensional reductions.
 #'
-#' @details
-#' Raw counts are selected conservatively from an explicit `counts` layer when available or from `X` when it is non-negative and integer-like. The function does not guess raw counts from arbitrary named layers.
+#' An explicit `layers["counts"]` matrix is preferred as the counts assay.
+#' Fractional values are accepted in an explicit counts layer as long as all
+#' values are finite and non-negative. If no explicit counts layer is present,
+#' `X` is used as counts only when its values are finite, non-negative, and
+#' integer-like.
 #'
-#' @param input Path to an input `.h5ad` file.
-#' @param output Path to the output SingleCellExperiment `.rds` file.
+#' Normalized expression is optional. If `layers["logcounts"]` is present it
+#' is stored as the SCE `logcounts` assay. Otherwise, `X` is used as
+#' `logcounts` when it was not already used as the counts matrix.
 #'
-#' @return The output path, returned invisibly on success. If suitable raw count data cannot be identified, the function may return `NULL` invisibly without writing an output object.
+#' @param input Path to an AnnData H5AD file.
+#' @param output Path where the converted SingleCellExperiment RDS file
+#'   should be written.
+#'
+#' @return Invisibly returns the output file path.
+#'
 #' @export
 convert_anndata_to_sce <- function(input, output) {
+  ## Check that the input file exists
   if (!file.exists(input)) {
-    stop("File does not exist. Please recheck the path.")
+    stop(
+      "File does not exist. Please recheck the path.",
+      call. = FALSE
+    )
   }
 
+  ## Normalize input path
   input <- normalizePath(input, mustWork = TRUE)
+
   message("Reading AnnData object...")
 
+  ## Import required Python modules
   reticulate::py_require("anndata>=0.10")
 
-  ad <- reticulate::import("anndata", convert = FALSE)
-  scipy_sparse <- reticulate::import("scipy.sparse", convert = FALSE)
+  ad <- reticulate::import(
+    "anndata",
+    convert = FALSE
+  )
 
+  scipy_sparse <- reticulate::import(
+    "scipy.sparse",
+    convert = FALSE
+  )
+
+  ## Read AnnData object
   adata <- ad$read_h5ad(input)
 
   message("Inspecting AnnData structure...")
 
+  ## Get object dimensions
   n_cells <- reticulate::py_to_r(adata$n_obs)
   n_features <- reticulate::py_to_r(adata$n_vars)
 
   message("Number of cells: ", n_cells)
   message("Number of features: ", n_features)
 
+  ## Get available layers
   layers <- reticulate::iterate(
     adata$layers$keys(),
     as.character
@@ -146,6 +176,7 @@ convert_anndata_to_sce <- function(input, output) {
       layers != "None"
   ]
 
+  ## Get available reductions
   reductions <- reticulate::iterate(
     adata$obsm$keys(),
     as.character
@@ -158,19 +189,17 @@ convert_anndata_to_sce <- function(input, output) {
       reductions != "None"
   ]
 
-  # Get axis names
-  cell_names <- reticulate::iterate(
-    adata$obs_names,
-    as.character
-  ) |>
-    unlist(use.names = FALSE)
+  ## Get cell names
+  cell_names <- reticulate::py_to_r(adata$obs_names$to_list())
+  cell_names <- unlist(cell_names, use.names = FALSE)
+  cell_names <- as.character(cell_names)
 
-  feature_names <- reticulate::iterate(
-    adata$var_names,
-    as.character
-  ) |>
-    unlist(use.names = FALSE)
+  ## Get feature names
+  feature_names <- reticulate::py_to_r(adata$var_names$to_list())
+  feature_names <- unlist(feature_names, use.names = FALSE)
+  feature_names <- as.character(feature_names)
 
+  ## Check for duplicated names
   if (anyDuplicated(cell_names)) {
     stop(
       "Duplicated cell names detected in AnnData.",
@@ -185,13 +214,11 @@ convert_anndata_to_sce <- function(input, output) {
     )
   }
 
-  # Find raw counts
+  ## Find raw counts
   raw_counts <- NULL
   counts_source <- NULL
 
-  # Prefer an explicit counts layer.
-  # Explicit counts are allowed to contain fractional values,
-  # for example after denoising or background correction.
+  ## Prefer an explicit counts layer
   if ("counts" %in% layers) {
     mat <- adata$layers$`__getitem__`("counts")
 
@@ -207,6 +234,7 @@ convert_anndata_to_sce <- function(input, output) {
       )
     }
 
+    ## Explicit counts may contain fractional values
     if (
       all(is.finite(values)) &&
       all(values >= 0)
@@ -226,8 +254,7 @@ convert_anndata_to_sce <- function(input, output) {
     }
   }
 
-  # If no explicit counts layer exists, X is only accepted as
-  # counts when it is finite, non-negative and integer-like.
+  ## Fall back to X only when it looks like raw counts
   if (is.null(raw_counts)) {
     mat <- adata$X
 
@@ -260,25 +287,18 @@ convert_anndata_to_sce <- function(input, output) {
     }
   }
 
-  # Conversion requires a valid counts matrix.
-  # Do not silently infer counts from raw.X or arbitrary layers.
+  ## Stop if no valid counts matrix was found
   if (is.null(raw_counts)) {
-    message(
-      "Raw counts-like matrix not found in X or layers['counts']."
-    )
-
-    message(
-      "Layers present: ",
-      collapse_or_none(layers)
-    )
-
     stop(
-      "Conversion cannot continue because no valid raw counts matrix was found.",
+      "Raw counts-like matrix not found in X or layers['counts'].\n",
+      "Layers present: ",
+      collapse_or_none(layers),
+      "\nConversion cannot continue because no valid raw counts matrix was found.",
       call. = FALSE
     )
   }
 
-  # Find normalized expression data
+  ## Find normalized expression data
   logcounts <- NULL
 
   if ("logcounts" %in% layers) {
@@ -287,39 +307,45 @@ convert_anndata_to_sce <- function(input, output) {
     )
 
     message("Using layers['logcounts'] as SCE logcounts.")
-  } else if (!identical(counts_source, "X") && !is.null(adata$X)) {
+
+  } else if (
+    !identical(counts_source, "X") &&
+    !is.null(adata$X)
+  ) {
     logcounts <- reticulate::py_to_r(
       adata$X$astype("float64")
     )
 
     message("Using X as SCE logcounts.")
+
   } else {
     message(
-      "Logcounts not found. SCE will contain counts only."
+      "Normalized expression not found. ",
+      "SCE will contain counts only."
     )
   }
 
-  # AnnData = cells x features
-  # SCE     = features x cells
+  ## AnnData stores cells x features
+  ## SCE stores features x cells
   raw_counts <- Matrix::t(raw_counts)
 
   if (!is.null(logcounts)) {
     logcounts <- Matrix::t(logcounts)
   }
 
-  # Cell metadata
+  ## Get cell metadata
   metadata <- reticulate::py_to_r(
     adata$obs
   ) |>
     as.data.frame()
 
-  # Feature metadata
+  ## Get feature metadata
   feature_metadata <- reticulate::py_to_r(
     adata$var
   ) |>
     as.data.frame()
 
-  # Restore dimnames
+  ## Restore matrix and metadata names
   rownames(raw_counts) <- feature_names
   colnames(raw_counts) <- cell_names
 
@@ -331,7 +357,7 @@ convert_anndata_to_sce <- function(input, output) {
   rownames(metadata) <- cell_names
   rownames(feature_metadata) <- feature_names
 
-  # Alignment checks
+  ## Check counts and cell metadata alignment
   if (!identical(
     colnames(raw_counts),
     rownames(metadata)
@@ -342,6 +368,7 @@ convert_anndata_to_sce <- function(input, output) {
     )
   }
 
+  ## Check counts and feature metadata alignment
   if (!identical(
     rownames(raw_counts),
     rownames(feature_metadata)
@@ -352,6 +379,7 @@ convert_anndata_to_sce <- function(input, output) {
     )
   }
 
+  ## Check normalized expression alignment when present
   if (!is.null(logcounts)) {
     if (
       !identical(dim(raw_counts), dim(logcounts)) ||
@@ -367,7 +395,7 @@ convert_anndata_to_sce <- function(input, output) {
 
   message("Matrix alignment checks passed!")
 
-  # Build assay list
+  ## Build assay list
   assays_list <- list(
     counts = raw_counts
   )
@@ -376,14 +404,14 @@ convert_anndata_to_sce <- function(input, output) {
     assays_list$logcounts <- logcounts
   }
 
-  # Construct SingleCellExperiment
+  ## Create SingleCellExperiment object
   sce <- SingleCellExperiment::SingleCellExperiment(
     assays = assays_list,
     colData = S4Vectors::DataFrame(metadata),
     rowData = S4Vectors::DataFrame(feature_metadata)
   )
 
-  # Restore AnnData reductions
+  ## Restore AnnData reductions
   if (length(reductions) > 0) {
     for (red in reductions) {
       emb <- reticulate::py_to_r(
@@ -405,6 +433,7 @@ convert_anndata_to_sce <- function(input, output) {
         )
       }
 
+      ## Remove the conventional AnnData X_ prefix
       sce_red_name <- sub(
         "^X_",
         "",
@@ -427,6 +456,7 @@ convert_anndata_to_sce <- function(input, output) {
   message("SingleCellExperiment object created")
   message("Writing RDS output file...")
 
+  ## Prepare output path
   output <- path.expand(output)
 
   if (!dir.exists(dirname(output))) {
@@ -437,6 +467,7 @@ convert_anndata_to_sce <- function(input, output) {
     )
   }
 
+  ## Write output
   saveRDS(
     sce,
     file = output

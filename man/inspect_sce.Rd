@@ -10,9 +10,12 @@ inspect_sce(obj)
 \item{obj}{A SingleCellExperiment object.}
 }
 \value{
-A named list of structural information, returned invisibly.
+Invisibly returns a list containing information about the
+SingleCellExperiment object.
 }
 \description{
-Reports dimensions, assays, reduced dimensions, alternative experiments, cell metadata, feature metadata, and a sample of cell names.
+Internal helper that reports the structure of a SingleCellExperiment
+object, including its dimensions, assays, reduced dimensions, alternative
+experiments, cell metadata, feature metadata, and a sample of cell names.
 }
 \keyword{internal}

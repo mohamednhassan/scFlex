@@ -2,17 +2,21 @@
 % Please edit documentation in R/inspect_sc.R
 \name{inspect_anndata}
 \alias{inspect_anndata}
-\title{Inspect an AnnData file}
+\title{Inspect an AnnData object}
 \usage{
 inspect_anndata(path_to_file)
 }
 \arguments{
-\item{path_to_file}{Character string giving the path to an \code{.h5ad} file.}
+\item{path_to_file}{Path to an H5AD file.}
 }
 \value{
-A named list of AnnData structural information, returned invisibly.
+Invisibly returns a list containing information about the
+AnnData object.
 }
 \description{
-Reads an H5AD file with Python AnnData and reports its dimensions, X matrix, layers, reductions, graphs, feature matrices, unstructured metadata, raw slot, metadata columns, and cell names.
+Internal helper that reads an H5AD file and reports its dimensions,
+primary matrix, layers, cell-level matrices, graphs, feature-level
+matrices, unstructured metadata, raw data, metadata columns, and a
+sample of cell names.
 }
 \keyword{internal}

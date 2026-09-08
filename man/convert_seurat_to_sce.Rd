@@ -15,5 +15,7 @@ convert_seurat_to_sce(input, output)
 The output path, returned invisibly.
 }
 \description{
-Reads a Seurat RDS object and creates a SingleCellExperiment while preserving supported assays, cell metadata, feature metadata, and reductions.
+Reads a Seurat RDS object and writes a SingleCellExperiment RDS object while
+preserving supported counts, normalized expression, metadata, feature
+metadata, and dimensional reductions.
 }

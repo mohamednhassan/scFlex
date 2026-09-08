@@ -12,11 +12,10 @@ convert_anndata_to_seurat(input, output)
 \item{output}{Path to the output Seurat \code{.rds} file.}
 }
 \value{
-The output path, returned invisibly on success. If suitable raw count data cannot be identified, the function may return \code{NULL} invisibly without writing an output object.
+The output path, returned invisibly.
 }
 \description{
-Reads an H5AD AnnData file and creates a Seurat object while preserving supported expression data, metadata, feature metadata, and dimensional reductions when available.
-}
-\details{
-Raw counts are selected conservatively from an explicit \code{counts} layer when available or from \code{X} when it is non-negative and integer-like. The function does not guess raw counts from arbitrary named layers.
+Reads an AnnData H5AD file and writes a Seurat RDS object while preserving
+supported counts, normalized expression, metadata, feature metadata, and
+dimensional reductions.
 }
