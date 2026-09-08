@@ -12,20 +12,20 @@ The goal is not merely to produce a file with a new extension. scFlex checks cel
 
 ## Supported conversions
 
-| From | To | Status |
-|---|---|---|
-| Seurat | AnnData | Supported |
-| AnnData | Seurat | Supported |
-| Seurat | SingleCellExperiment | Supported |
-| SingleCellExperiment | Seurat | Supported |
-| SingleCellExperiment | AnnData | Supported |
-| AnnData | SingleCellExperiment | Supported |
-| Seurat | Loom | Supported with Loom limitations |
-| Loom | Seurat | Supported with Loom limitations |
-| SingleCellExperiment | Loom | Supported with Loom limitations |
-| Loom | SingleCellExperiment | Supported with Loom limitations |
-| AnnData | Loom | Supported with Loom limitations |
-| Loom | AnnData | Supported with Loom limitations |
+| From                 | To                   | Status                          |
+| -------------------- | -------------------- | ------------------------------- |
+| Seurat               | AnnData              | Supported                       |
+| AnnData              | Seurat               | Supported                       |
+| Seurat               | SingleCellExperiment | Supported                       |
+| SingleCellExperiment | Seurat               | Supported                       |
+| SingleCellExperiment | AnnData              | Supported                       |
+| AnnData              | SingleCellExperiment | Supported                       |
+| Seurat               | Loom                 | Supported with Loom limitations |
+| Loom                 | Seurat               | Supported with Loom limitations |
+| SingleCellExperiment | Loom                 | Supported with Loom limitations |
+| Loom                 | SingleCellExperiment | Supported with Loom limitations |
+| AnnData              | Loom                 | Supported with Loom limitations |
+| Loom                 | AnnData              | Supported with Loom limitations |
 
 > Loom has a smaller and increasingly legacy data model. scFlex supports it as an interchange format but does not claim lossless preservation of components Loom cannot represent.
 
@@ -44,62 +44,110 @@ For AnnData conversion, scFlex declares `anndata>=0.10`. Loom conversion additio
 
 ## Basic usage
 
-```r
-library(scFlex)
+### 1. Inspect the object first
 
+Before conversion, inspect the input object to understand its structure and available components.
+
+```r
+inspect_sc("object.rds")
+inspect_sc("object.h5ad")
+inspect_sc("object.loom")
+```
+
+`inspect_sc()` reports the detected object structure, including information such as assays/layers, dimensions, metadata, and dimensional reductions, without assigning a subjective conversion score.
+
+### 2. Convert with `convert_sc()`
+
+After inspection, use the general `convert_sc()` interface:
+
+```r
 convert_sc(
   input = "object.rds",
   output = "object.h5ad",
-  from = "seurat",
-  to = "anndata"
+  source = "seurat",
+  destination = "anndata"
 )
 ```
 
-Format-specific wrappers are also available:
+Another example:
+
+```r
+convert_sc(
+  input = "object.h5ad",
+  output = "object_sce.rds",
+  source = "anndata",
+  destination = "sce"
+)
+```
+
+Format-specific conversion functions are also available:
 
 ```r
 convert_seurat_to_anndata("object.rds", "object.h5ad")
 convert_anndata_to_seurat("object.h5ad", "object.rds")
+
 convert_seurat_to_sce("object.rds", "object_sce.rds")
+convert_sce_to_seurat("object_sce.rds", "object.rds")
+
 convert_sce_to_anndata("object_sce.rds", "object.h5ad")
+convert_anndata_to_sce("object.h5ad", "object_sce.rds")
+
 convert_anndata_to_loom("object.h5ad", "object.loom")
+convert_loom_to_anndata("object.loom", "object.h5ad")
 ```
 
-## Inspect before converting
+## Seurat assay conversion
+
+scFlex also provides helper functions for converting between classic Seurat `Assay` objects and Seurat v5 `Assay5` objects.
+
+### Seurat v5 Assay5 to classic Assay
 
 ```r
-inspect_sc("object.rds", format = "seurat")
-inspect_sc("object.h5ad")
+convert_seu_v5_to_classic(
+  input = "object.rds",
+  output = "object_classic.rds",
+  assay = "RNA"
+)
 ```
 
-`inspect_sc()` reports the object structure without assigning a subjective score.
+### Classic Seurat Assay to Seurat v5 Assay5
+
+```r
+convert_seu_classic_to_v5(
+  input = "object.rds",
+  output = "object_v5.rds",
+  assay = "RNA"
+)
+```
+
+These functions are useful when working with tools or workflows that expect a particular Seurat assay structure.
 
 ## Preservation model
 
 Typical mappings include:
 
-| Concept | Seurat | AnnData | SingleCellExperiment |
-|---|---|---|---|
-| Raw counts | `counts` | `layers["counts"]` | `assay("counts")` |
-| Normalized expression | `data` | `X` | `assay("logcounts")` |
-| Cell metadata | `meta.data` | `obs` | `colData` |
-| Feature metadata | assay metadata | `var` | `rowData` |
-| Embeddings | reductions | `obsm` | `reducedDims` |
+| Concept               | Seurat         | AnnData            | SingleCellExperiment |
+| --------------------- | -------------- | ------------------ | -------------------- |
+| Raw counts            | `counts`       | `layers["counts"]` | `assay("counts")`    |
+| Normalized expression | `data`         | `X`                | `assay("logcounts")` |
+| Cell metadata         | `meta.data`    | `obs`              | `colData`            |
+| Feature metadata      | assay metadata | `var`              | `rowData`            |
+| Embeddings            | reductions     | `obsm`             | `reducedDims`        |
 
+## Seurat v5 split layers
 
-## Seurat assay-structure helpers
+scFlex recognizes both canonical layers such as `counts`/`data` and split Seurat v5 layers such as:
 
-```r
-convert_seu_v5_to_classic(
-  "object.rds",
-  "object_classic.rds"
-)
-
-convert_seu_classic_to_v5(
-  "object.rds",
-  "object_v5.rds"
-)
+```text
+counts.sample1
+counts.sample2
+data.sample1
+data.sample2
 ```
+
+Matching split layers are joined internally on a temporary assay for conversion; the input object is not modified.
+
+Counts-only Seurat objects are also valid conversion inputs. When normalized expression is absent, AnnData `X` is populated with the raw counts without normalization, and the conversion result reports this explicitly.
 
 ## Development
 
@@ -116,14 +164,3 @@ Version 0.1.0 focuses on expression matrices, cell/feature metadata, and dimensi
 ## License
 
 MIT.
-
-## Seurat v5 split layers
-
-scFlex recognizes both canonical layers such as `counts`/`data` and split
-Seurat v5 layers such as `counts.sample1`, `counts.sample2`, and `data.sample1`.
-Matching split layers are joined internally on a temporary assay for conversion;
-the input object is not modified.
-
-Counts-only Seurat objects are also valid conversion inputs. When normalized
-expression is absent, AnnData `X` is populated with the raw counts without
-normalization, and the conversion result reports this explicitly.
