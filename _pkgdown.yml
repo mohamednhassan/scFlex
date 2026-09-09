@@ -1,0 +1,58 @@
+url: https://mohamednhassan.github.io/scFlex/
+
+template:
+  bootstrap: 5
+  light-switch: true
+
+navbar:
+  structure:
+    left: [home, reference, articles, news]
+    right: [search, github]
+
+reference:
+  - title: "Inspection"
+    desc: >
+      Inspect single-cell objects before conversion.
+    contents:
+      - inspect_sc
+
+  - title: "General conversion"
+    desc: >
+      Convert between supported single-cell object formats through a
+      common interface.
+    contents:
+      - convert_sc
+
+  - title: "Seurat"
+    desc: >
+      Conversion between Seurat, AnnData, and SingleCellExperiment,
+      including Seurat assay-version utilities.
+    contents:
+      - convert_seurat_to_anndata
+      - convert_anndata_to_seurat
+      - convert_seurat_to_sce
+      - convert_sce_to_seurat
+      - convert_seu_v5_to_classic
+      - convert_seu_classic_to_v5
+
+  - title: "SingleCellExperiment"
+    desc: >
+      Conversion between SingleCellExperiment and AnnData.
+    contents:
+      - convert_sce_to_anndata
+      - convert_anndata_to_sce
+
+  - title: "Loom"
+    desc: >
+      Conversion between Loom and other supported formats.
+    contents:
+      - convert_loom_to_anndata
+      - convert_anndata_to_loom
+      - convert_loom_to_seurat
+      - convert_seurat_to_loom
+      - convert_loom_to_sce
+      - convert_sce_to_loom
+
+  - title: "Package"
+    contents:
+      - scFlex-package
