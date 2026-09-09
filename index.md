@@ -10,7 +10,10 @@ when a target format cannot represent part of the source object.
 
 ## Overview
 
-![](figures/scFlex_overview.png)
+![Overview of the scFlex single-cell object conversion
+workflow](reference/figures/scFlex_overview.png)
+
+Overview of the scFlex single-cell object conversion workflow
 
 ## Supported conversions
 
