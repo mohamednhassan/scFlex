@@ -6,9 +6,7 @@ The goal is not merely to produce a file with a new extension. scFlex checks cel
 
 ## Overview
 
-<p align="center">
-  <img src="figures/scFlex_overview.png" width="900">
-</p>
+![Overview of the scFlex single-cell object conversion workflow](man/figures/scFlex_overview.png)
 
 ## Supported conversions
 
