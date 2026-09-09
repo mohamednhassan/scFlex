@@ -1,6 +1,6 @@
 # scFlex
 
-**scFlex** is an R package for preservation-aware conversion among
+**scFlex** is an R package for converting single cell classes among
 **Seurat**, **SingleCellExperiment**, **AnnData**, and **Loom**.
 
 The goal is not merely to produce a file with a new extension. scFlex
