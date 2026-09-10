@@ -1,6 +1,7 @@
 # Functional validation for SingleCellExperiment <-> AnnData conversions
 
 testthat::test_that("SCE -> AnnData preserves core data components", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
   testthat::skip_if_not_installed("SingleCellExperiment")
   testthat::skip_if_not_installed("SummarizedExperiment")
@@ -157,6 +158,7 @@ testthat::test_that("SCE -> AnnData preserves core data components", {
 
 
 testthat::test_that("AnnData -> SCE prefers layers['counts'] and preserves core content", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
   testthat::skip_if_not_installed("SingleCellExperiment")
   testthat::skip_if_not_installed("SummarizedExperiment")
@@ -298,6 +300,7 @@ testthat::test_that("AnnData -> SCE prefers layers['counts'] and preserves core 
 
 
 testthat::test_that("SCE -> AnnData -> SCE round trip preserves supported content", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
   testthat::skip_if_not_installed("SingleCellExperiment")
   testthat::skip_if_not_installed("SummarizedExperiment")
@@ -427,6 +430,7 @@ testthat::test_that("SCE -> AnnData -> SCE round trip preserves supported conten
 
 
 testthat::test_that("AnnData -> SCE uses integer-like X as counts when counts layer is absent", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
   testthat::skip_if_not_installed("SingleCellExperiment")
   testthat::skip_if_not_installed("SummarizedExperiment")
@@ -481,6 +485,7 @@ testthat::test_that("AnnData -> SCE uses integer-like X as counts when counts la
 
 
 testthat::test_that("AnnData -> SCE rejects non-count-like X when counts layer is absent", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
 
   reticulate::py_require("anndata>=0.10")
@@ -525,6 +530,7 @@ testthat::test_that("AnnData -> SCE rejects non-count-like X when counts layer i
 
 
 testthat::test_that("AnnData -> SCE prefers explicit counts layer over count-like X", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
   testthat::skip_if_not_installed("SingleCellExperiment")
   testthat::skip_if_not_installed("SummarizedExperiment")

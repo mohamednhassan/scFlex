@@ -1,6 +1,7 @@
 # Regression tests for issues discovered during validation on real datasets
 
 testthat::test_that("AnnData explicit counts layer accepts fractional non-negative counts", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
   testthat::skip_if_not_installed("SeuratObject")
   testthat::skip_if_not_installed("SingleCellExperiment")
@@ -73,6 +74,7 @@ testthat::test_that("AnnData explicit counts layer accepts fractional non-negati
 
 
 testthat::test_that("Loom explicit counts layer accepts fractional non-negative counts", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
   testthat::skip_if_not_installed("SeuratObject")
   testthat::skip_if_not_installed("SingleCellExperiment")
@@ -157,6 +159,7 @@ testthat::test_that("Loom explicit counts layer accepts fractional non-negative 
 
 
 testthat::test_that("inspect_sc reports Loom cells and features in correct orientation", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
   testthat::skip_if_not_installed("hdf5r")
 
@@ -206,6 +209,7 @@ testthat::test_that("inspect_sc reports Loom cells and features in correct orien
 
 
 testthat::test_that("Loom round trip does not add original_feature_name when feature names are unique", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
   testthat::skip_if_not_installed("SeuratObject")
 
@@ -262,6 +266,7 @@ testthat::test_that("Loom round trip does not add original_feature_name when fea
 
 
 testthat::test_that("Loom preserves original feature names when duplicates require uniquification", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
   testthat::skip_if_not_installed("SeuratObject")
 

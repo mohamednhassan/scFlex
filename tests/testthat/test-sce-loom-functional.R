@@ -1,6 +1,7 @@
 # Functional validation for SingleCellExperiment <-> Loom conversions
 
 testthat::test_that("SCE -> Loom preserves core matrix, names, metadata, and reductions where supported", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("SingleCellExperiment")
   testthat::skip_if_not_installed("SummarizedExperiment")
   testthat::skip_if_not_installed("S4Vectors")
@@ -155,6 +156,7 @@ testthat::test_that("SCE -> Loom preserves core matrix, names, metadata, and red
 
 
 testthat::test_that("Loom -> SCE preserves primary matrix, names, and metadata", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("SingleCellExperiment")
   testthat::skip_if_not_installed("SummarizedExperiment")
   testthat::skip_if_not_installed("reticulate")
@@ -246,6 +248,7 @@ testthat::test_that("Loom -> SCE preserves primary matrix, names, and metadata",
 
 
 testthat::test_that("SCE -> Loom -> SCE round trip preserves supported core content", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("SingleCellExperiment")
   testthat::skip_if_not_installed("SummarizedExperiment")
   testthat::skip_if_not_installed("S4Vectors")
@@ -314,6 +317,7 @@ testthat::test_that("SCE -> Loom -> SCE round trip preserves supported core cont
 
 
 testthat::test_that("counts-only SCE converts to Loom without inventing normalized data", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("SingleCellExperiment")
   testthat::skip_if_not_installed("reticulate")
 
@@ -369,6 +373,7 @@ testthat::test_that("counts-only SCE converts to Loom without inventing normaliz
 
 
 testthat::test_that("SCE duplicate feature names are made unique at Loom boundary", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("SingleCellExperiment")
   testthat::skip_if_not_installed("reticulate")
 

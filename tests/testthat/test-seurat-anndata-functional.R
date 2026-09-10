@@ -1,6 +1,7 @@
 # Functional validation for Seurat <-> AnnData conversions
 
 testthat::test_that("Seurat -> AnnData preserves core data components", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
   testthat::skip_if_not_installed("SeuratObject")
   testthat::skip_if_not_installed("Matrix")
@@ -161,6 +162,7 @@ testthat::test_that("Seurat -> AnnData preserves core data components", {
 
 
 testthat::test_that("AnnData -> Seurat preserves core data components", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
   testthat::skip_if_not_installed("SeuratObject")
 
@@ -309,6 +311,7 @@ testthat::test_that("AnnData -> Seurat preserves core data components", {
 
 
 testthat::test_that("Seurat -> AnnData -> Seurat round trip preserves supported content", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
   testthat::skip_if_not_installed("SeuratObject")
   testthat::skip_if_not_installed("Matrix")
@@ -462,6 +465,7 @@ testthat::test_that("Seurat -> AnnData -> Seurat round trip preserves supported 
 
 
 testthat::test_that("counts-only Seurat -> AnnData keeps counts without inventing normalized values", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
   testthat::skip_if_not_installed("SeuratObject")
   testthat::skip_if_not_installed("Matrix")
@@ -527,6 +531,7 @@ testthat::test_that("counts-only Seurat -> AnnData keeps counts without inventin
 
 
 testthat::test_that("AnnData -> Seurat uses integer-like X as counts when counts layer is absent", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
   testthat::skip_if_not_installed("SeuratObject")
 
@@ -583,6 +588,7 @@ testthat::test_that("AnnData -> Seurat uses integer-like X as counts when counts
 
 
 testthat::test_that("AnnData -> Seurat rejects non-count-like X when counts layer is absent", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
 
   reticulate::py_require("anndata>=0.10")
@@ -628,6 +634,7 @@ testthat::test_that("AnnData -> Seurat rejects non-count-like X when counts laye
 
 
 testthat::test_that("AnnData -> Seurat prefers explicit counts layer over count-like X", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
   testthat::skip_if_not_installed("SeuratObject")
 
@@ -694,6 +701,7 @@ testthat::test_that("AnnData -> Seurat prefers explicit counts layer over count-
 
 
 testthat::test_that("split Seurat v5 layers are joined during Seurat -> AnnData", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
   testthat::skip_if_not_installed("SeuratObject")
   testthat::skip_if_not_installed("Matrix")

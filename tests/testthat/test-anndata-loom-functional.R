@@ -1,6 +1,7 @@
 # Functional validation for AnnData <-> Loom conversions
 
 testthat::test_that("AnnData -> Loom preserves core matrix and annotations", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
 
   reticulate::py_require(c("anndata>=0.10", "loompy>=3.0"))
@@ -159,6 +160,7 @@ testthat::test_that("AnnData -> Loom preserves core matrix and annotations", {
 
 
 testthat::test_that("Loom -> AnnData preserves primary matrix and axis names", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
 
   reticulate::py_require(c("anndata>=0.10", "loompy>=3.0"))
@@ -252,6 +254,7 @@ testthat::test_that("Loom -> AnnData preserves primary matrix and axis names", {
 
 
 testthat::test_that("AnnData -> Loom -> AnnData round trip preserves supported core content", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
 
   reticulate::py_require(c("anndata>=0.10", "loompy>=3.0"))
@@ -342,6 +345,7 @@ testthat::test_that("AnnData -> Loom -> AnnData round trip preserves supported c
 
 
 testthat::test_that("AnnData -> Loom rejects duplicate cell names", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
 
   reticulate::py_require(c("anndata>=0.10", "loompy>=3.0"))
@@ -386,6 +390,7 @@ testthat::test_that("AnnData -> Loom rejects duplicate cell names", {
 
 
 testthat::test_that("duplicate feature names are made unique at Loom boundary", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("reticulate")
 
   reticulate::py_require(c("anndata>=0.10", "loompy>=3.0"))

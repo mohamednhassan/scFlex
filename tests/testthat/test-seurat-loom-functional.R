@@ -1,6 +1,7 @@
 # Functional validation for Seurat <-> Loom conversions
 
 testthat::test_that("Seurat -> Loom preserves core matrix, names, metadata, and reductions where supported", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("SeuratObject")
   testthat::skip_if_not_installed("reticulate")
 
@@ -170,6 +171,7 @@ testthat::test_that("Seurat -> Loom preserves core matrix, names, metadata, and 
 
 
 testthat::test_that("Loom -> Seurat preserves counts-like primary matrix, names, and metadata", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("SeuratObject")
   testthat::skip_if_not_installed("reticulate")
 
@@ -260,6 +262,7 @@ testthat::test_that("Loom -> Seurat preserves counts-like primary matrix, names,
 
 
 testthat::test_that("Seurat -> Loom -> Seurat round trip preserves supported core content", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("SeuratObject")
   testthat::skip_if_not_installed("reticulate")
 
@@ -331,6 +334,7 @@ testthat::test_that("Seurat -> Loom -> Seurat round trip preserves supported cor
 
 
 testthat::test_that("Seurat v5 split layers are supported during Seurat -> Loom", {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("SeuratObject")
   testthat::skip_if_not_installed("reticulate")
 

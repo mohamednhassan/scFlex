@@ -1,12 +1,27 @@
-## scFlex 0.1.0
+## R CMD check results
 
-Initial development release.
+0 errors | 0 warnings | 3 notes
 
-Before CRAN submission:
+* This is a new submission.
 
-* Replace the placeholder maintainer email in DESCRIPTION.
-* Replace the placeholder GitHub username in DESCRIPTION and README.md.
-* Run `devtools::document()`.
-* Run `devtools::test()`.
-* Run `devtools::check()` and resolve all ERRORs, WARNINGs, and relevant NOTEs.
-* Test AnnData and Loom conversion on Linux, macOS, and Windows.
+* The check reported:
+  "unable to verify current time".
+  This appears to be specific to the local checking environment.
+
+* HTML validation was skipped because the external `tidy` command was not
+  available in the local checking environment.
+
+## Test environments
+
+* Ubuntu 24.04.3 LTS, R 4.4.1
+* GitHub Actions R-CMD-check
+* R-hub Windows
+* R-hub Ubuntu release
+
+Additional R-hub checks on macOS ARM R-devel and a Clang 21 environment did
+not reach the scFlex package check because dependency installation failed
+before scFlex was checked.
+
+## Downstream dependencies
+
+There are currently no known downstream dependencies.
