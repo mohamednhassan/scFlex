@@ -28,7 +28,7 @@ Suggests:
     SingleCellExperiment,
     SummarizedExperiment,
     S4Vectors,
-    testthat (>= 3.0.0)s
+    testthat (>= 3.0.0)
 Config/testthat/edition: 3
 URL: https://github.com/mohamednhassan/scFlex, https://mohamednhassan.github.io/scFlex/
 BugReports: https://github.com/mohamednhassan/scFlex/issues
