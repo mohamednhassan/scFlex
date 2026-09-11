@@ -9,12 +9,12 @@
 Source:
 [`DESCRIPTION`](https://github.com/mohamednhassan/scFlex/blob/main/DESCRIPTION)
 
-Hassan M (2026). *scFlex: Preservation-Aware Interoperability for
-Single-Cell Data Objects*. R package version 0.1.0,
+Hassan M (2026). *scFlex: Flexible Conversion Between Single-Cell Data
+Objects*. R package version 0.1.0,
 <https://github.com/mohamednhassan/scFlex>.
 
     @Manual{,
-      title = {scFlex: Preservation-Aware Interoperability for Single-Cell Data Objects},
+      title = {scFlex: Flexible Conversion Between Single-Cell Data Objects},
       author = {Mohamed N. Hassan},
       year = {2026},
       note = {R package version 0.1.0},
