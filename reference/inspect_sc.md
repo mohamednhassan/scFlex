@@ -32,9 +32,34 @@ reported when available.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-inspect_sc("example.rds")
-inspect_sc("example.h5ad")
-inspect_sc("example.loom")
-} # }
+if (requireNamespace("Seurat", quietly = TRUE)) {
+  counts <- matrix(
+    c(1, 0, 3, 0, 2, 1),
+    nrow = 2,
+    dimnames = list(
+      c("Gene1", "Gene2"),
+      c("Cell1", "Cell2", "Cell3")
+    )
+  )
+  obj <- Seurat::CreateSeuratObject(counts = counts)
+  path <- tempfile(fileext = ".rds")
+  saveRDS(obj, path)
+  inspect_sc(path)
+  unlink(path)
+}
+#> Warning: Data is of class matrix. Coercing to dgCMatrix.
+#> RDS file detected.
+#> Seurat object detected.
+#> Version of Seurat: 5.4.0
+#> Number of cells: 3
+#> Number of features: 2
+#> Assays [1]: RNA
+#> Default assay: RNA
+#> Default assay structure: Assay5
+#> Default assay layers [1]: counts
+#> Reductions [0]: None
+#> Graphs [0]: None
+#> Neighbors [0]: None
+#> Metadata columns [3]: orig.ident, nCount_RNA, nFeature_RNA
+#> Sample of cell names: Cell1, Cell3, Cell2
 ```
