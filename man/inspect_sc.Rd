@@ -26,10 +26,20 @@ and a sample of cell names. Additional format-specific information is
 reported when available.
 }
 \examples{
-\dontrun{
-inspect_sc("example.rds")
-inspect_sc("example.h5ad")
-inspect_sc("example.loom")
+if (requireNamespace("Seurat", quietly = TRUE)) {
+  counts <- matrix(
+    c(1, 0, 3, 0, 2, 1),
+    nrow = 2,
+    dimnames = list(
+      c("Gene1", "Gene2"),
+      c("Cell1", "Cell2", "Cell3")
+    )
+  )
+  obj <- Seurat::CreateSeuratObject(counts = counts)
+  path <- tempfile(fileext = ".rds")
+  saveRDS(obj, path)
+  inspect_sc(path)
+  unlink(path)
 }
 
 }

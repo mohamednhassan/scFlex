@@ -336,6 +336,7 @@ testthat::test_that("Loom preserves original feature names when duplicates requi
 
 test_that("AnnData conversions error when no valid counts source exists", {
 
+  testthat::skip_on_cran()
   skip_if_not_installed("reticulate")
   skip_if_not_installed("Seurat")
   skip_if_not_installed("SingleCellExperiment")
