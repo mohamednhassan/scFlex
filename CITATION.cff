@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use scFlex in your research, please cite it using the metadata below."
+type: software
+title: "scFlex: Flexible Conversion Between Single-Cell Data Objects"
+version: 0.1.0
+authors:
+  - family-names: "Hassan"
+    given-names: "Mohamed N."
+    orcid: "https://orcid.org/0000-0002-8358-4122"
+repository-code: "https://github.com/mohamednhassan/scFlex"
+url: "https://mohamednhassan.github.io/scFlex/"
+license: "MIT"

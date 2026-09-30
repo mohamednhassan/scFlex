@@ -57,9 +57,77 @@ inspect_sc("object.loom")
 
 `inspect_sc()` reports the detected object structure, including information such as assays/layers, dimensions, metadata, and dimensional reductions, without assigning a subjective conversion score.
 
+**Example output:**
+
+```text
+> scFlex::inspect_sc("example.h5ad")
+
+H5AD file detected.
+Reading AnnData object...
+
+Input of class AnnData
+
+Number of cells: 210838
+Number of features: 32159
+
+X present: Yes
+Layers [1]: raw_counts
+
+Reductions (obsm) [1]: X_umap
+Graphs (obsp) [0]: None
+Feature matrices (varm) [0]: None
+Raw present: Yes
+
+Metadata columns (obs) [48]: sample, condition, age_range, ...
+Feature metadata columns (var) [6]: ensembl_version, feature_name, feature_type, ...
+```
+
 ### 2. Convert with `convert_sc()`
 
 After inspection, use the general `convert_sc()` interface:
+
+For example, converting an AnnData object to Seurat:
+
+```r
+convert_sc(
+  input = "example.h5ad",
+  source = "anndata",
+  destination = "seurat",
+  output = "example.rds"
+)
+```
+
+**Example output:**
+
+```text
+Converting anndata -> seurat...
+Reading AnnData object...
+Inspecting AnnData structure...
+
+Number of cells: 57498
+Number of features: 21045
+
+Using layers['counts'] as Seurat counts.
+Raw counts: 21045 x 57498
+Metadata: 57498 x 13
+
+Matrix alignment checks passed!
+
+X_pca: 57498 cells x 50 dimensions
+X_umap: 57498 cells x 2 dimensions
+
+Creating Seurat object...
+Counts have been added. Now adding reductions...
+
+2 layers present: counts, data
+2 dimensional reductions calculated: pca, umap
+
+Exporting Seurat as RDS file...
+
+Object created successfully.
+```
+
+Other conversions use the same interface:
 
 ```r
 convert_sc(
@@ -109,6 +177,18 @@ convert_seu_v5_to_classic(
   output = "object_classic.rds",
   assay = "RNA"
 )
+```
+
+**Example output:**
+
+```text
+Source assay 'RNA' is Assay5. Starting conversion to classic Assay...
+
+Conversion completed. RNA_classic assay has been added to the Seurat object.
+
+Saving object...
+
+Object has been saved!
 ```
 
 ### Classic Seurat Assay to Seurat v5 Assay5
