@@ -30,7 +30,9 @@ The goal is not merely to produce a file with a new extension. scFlex checks cel
 ## Installation
 
 ```r
+# Install from CRAN
 install.packages("scFlex")
+# Install from Github
 # install.packages("remotes")
 remotes::install_github("mohamednhassan/scFlex")
 ```
