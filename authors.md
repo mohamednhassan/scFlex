@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/mohamednhassan/scFlex/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/mohamednhassan/scFlex/blob/v0.1.0/DESCRIPTION)
 
 Hassan M (2026). *scFlex: Flexible Conversion Between Single-Cell Data
 Objects*. R package version 0.1.0,
