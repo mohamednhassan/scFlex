@@ -40,6 +40,7 @@ Overview of the scFlex single-cell object conversion workflow
 
 ``` r
 
+install.packages("scFlex")
 # install.packages("remotes")
 remotes::install_github("mohamednhassan/scFlex")
 ```

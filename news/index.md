@@ -19,6 +19,8 @@
 
 ## scFlex 0.1.0
 
+CRAN release: 2026-09-29
+
 - Initial development release.
 - Adds a common
   [`convert_sc()`](https://mohamednhassan.github.io/scFlex/reference/convert_sc.md)
