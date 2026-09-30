@@ -167,13 +167,69 @@
 <span><span class="fu"><a href="reference/inspect_sc.html">inspect_sc</a></span><span class="op">(</span><span class="st">"object.h5ad"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/inspect_sc.html">inspect_sc</a></span><span class="op">(</span><span class="st">"object.loom"</span><span class="op">)</span></span></code></pre></div>
 <p><code><a href="reference/inspect_sc.html">inspect_sc()</a></code> reports the detected object structure, including information such as assays/layers, dimensions, metadata, and dimensional reductions, without assigning a subjective conversion score.</p>
+<p><strong>Example output:</strong></p>
+<pre class="text"><code>&gt; scFlex::inspect_sc("example.h5ad")
+
+H5AD file detected.
+Reading AnnData object...
+
+Input of class AnnData
+
+Number of cells: 210838
+Number of features: 32159
+
+X present: Yes
+Layers [1]: raw_counts
+
+Reductions (obsm) [1]: X_umap
+Graphs (obsp) [0]: None
+Feature matrices (varm) [0]: None
+Raw present: Yes
+
+Metadata columns (obs) [48]: sample, condition, age_range, ...
+Feature metadata columns (var) [6]: ensembl_version, feature_name, feature_type, ...</code></pre>
 </div>
 <div class="section level3">
 <h3 id="id_2-convert-with-convert_sc">2. Convert with <code>convert_sc()</code>
 <a class="anchor" aria-label="anchor" href="#id_2-convert-with-convert_sc"></a>
 </h3>
 <p>After inspection, use the general <code><a href="reference/convert_sc.html">convert_sc()</a></code> interface:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<p>For example, converting an AnnData object to Seurat:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/convert_sc.html">convert_sc</a></span><span class="op">(</span></span>
+<span>  input <span class="op">=</span> <span class="st">"example.h5ad"</span>,</span>
+<span>  source <span class="op">=</span> <span class="st">"anndata"</span>,</span>
+<span>  destination <span class="op">=</span> <span class="st">"seurat"</span>,</span>
+<span>  output <span class="op">=</span> <span class="st">"example.rds"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><strong>Example output:</strong></p>
+<pre class="text"><code>Converting anndata -&gt; seurat...
+Reading AnnData object...
+Inspecting AnnData structure...
+
+Number of cells: 57498
+Number of features: 21045
+
+Using layers['counts'] as Seurat counts.
+Raw counts: 21045 x 57498
+Metadata: 57498 x 13
+
+Matrix alignment checks passed!
+
+X_pca: 57498 cells x 50 dimensions
+X_umap: 57498 cells x 2 dimensions
+
+Creating Seurat object...
+Counts have been added. Now adding reductions...
+
+2 layers present: counts, data
+2 dimensional reductions calculated: pca, umap
+
+Exporting Seurat as RDS file...
+
+Object created successfully.</code></pre>
+<p>Other conversions use the same interface:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/convert_sc.html">convert_sc</a></span><span class="op">(</span></span>
 <span>  input <span class="op">=</span> <span class="st">"object.rds"</span>,</span>
 <span>  output <span class="op">=</span> <span class="st">"object.h5ad"</span>,</span>
@@ -181,7 +237,7 @@
 <span>  destination <span class="op">=</span> <span class="st">"anndata"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Another example:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/convert_sc.html">convert_sc</a></span><span class="op">(</span></span>
 <span>  input <span class="op">=</span> <span class="st">"object.h5ad"</span>,</span>
 <span>  output <span class="op">=</span> <span class="st">"object_sce.rds"</span>,</span>
@@ -189,7 +245,7 @@
 <span>  destination <span class="op">=</span> <span class="st">"sce"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Format-specific conversion functions are also available:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/convert_seurat_to_anndata.html">convert_seurat_to_anndata</a></span><span class="op">(</span><span class="st">"object.rds"</span>, <span class="st">"object.h5ad"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/convert_anndata_to_seurat.html">convert_anndata_to_seurat</a></span><span class="op">(</span><span class="st">"object.h5ad"</span>, <span class="st">"object.rds"</span><span class="op">)</span></span>
 <span></span>
@@ -210,17 +266,25 @@
 <div class="section level3">
 <h3 id="seurat-v5-assay5-to-classic-assay">Seurat v5 Assay5 to classic Assay<a class="anchor" aria-label="anchor" href="#seurat-v5-assay5-to-classic-assay"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/convert_seu_v5_to_classic.html">convert_seu_v5_to_classic</a></span><span class="op">(</span></span>
 <span>  input <span class="op">=</span> <span class="st">"object.rds"</span>,</span>
 <span>  output <span class="op">=</span> <span class="st">"object_classic.rds"</span>,</span>
 <span>  assay <span class="op">=</span> <span class="st">"RNA"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p><strong>Example output:</strong></p>
+<pre class="text"><code>Source assay 'RNA' is Assay5. Starting conversion to classic Assay...
+
+Conversion completed. RNA_classic assay has been added to the Seurat object.
+
+Saving object...
+
+Object has been saved!</code></pre>
 </div>
 <div class="section level3">
 <h3 id="classic-seurat-assay-to-seurat-v5-assay5">Classic Seurat Assay to Seurat v5 Assay5<a class="anchor" aria-label="anchor" href="#classic-seurat-assay-to-seurat-v5-assay5"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/convert_seu_classic_to_v5.html">convert_seu_classic_to_v5</a></span><span class="op">(</span></span>
 <span>  input <span class="op">=</span> <span class="st">"object.rds"</span>,</span>
 <span>  output <span class="op">=</span> <span class="st">"object_v5.rds"</span>,</span>
@@ -294,7 +358,7 @@
 <div class="section level2">
 <h2 id="development">Development<a class="anchor" aria-label="anchor" href="#development"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">document</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">test</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">check</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
